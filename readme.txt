@@ -1,4 +1,9 @@
 
+From:
+https://github.com/MXButterfly/F15_18545_BattleZone
+
+Trying to simplify, cleanup, and get it running on MiSTer
+
 -- Keyboard players inputs :
 --
    F1          : Coin + Start 1P
