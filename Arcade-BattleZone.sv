@@ -207,7 +207,7 @@ assign VGA_CE   = ce_vid;
 assign VGA_R    = {r,r,r[2:1]};
 assign VGA_G    = {g,g,g[2:1]};
 assign VGA_B    = {b,b,b[2:1]};
-assign VGA_HS   = hs;
+assign VGA_HS   = ~hs;
 assign VGA_VS   = ~vs;
 
 assign HDMI_CLK = VGA_CLK;
