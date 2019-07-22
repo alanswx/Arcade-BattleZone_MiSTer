@@ -1,0 +1,20 @@
+JMP ADDR:201c
+SVEC: dY:0 dX:0 I:0
+Vector: dY:80 dX:0 I:0
+Vector: dY:-160 dX:80 I:7
+Vector: dY:0 dX:-160 I:7
+Vector: dY:160 dX:80 I:7
+Center
+Halt
+RTS
+SVEC: dY:0 dX:0 I:0
+JSR ADDR:2002
+Vector: dY:80 dX:0 I:0
+JSR ADDR:2002
+Vector: dY:-80 dX:0 I:0
+JSR ADDR:2002
+Vector: dY:0 dX:80 I:0
+JSR ADDR:2002
+Vector: dY:0 dX:-80 I:0
+JSR ADDR:2002 
+JMP ADDR:2000

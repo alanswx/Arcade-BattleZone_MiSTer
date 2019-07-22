@@ -1,0 +1,26 @@
+#
+# An unexpected error has occurred (11)
+#
+Stack:
+/afs/ece.cmu.edu/support/xilinx/xilinx.release/Vivado-2015.2/Vivado/2015.2/tps/lnx64/jre/lib/amd64/server/libjvm.so(+0x8e58a9) [0x7f742b1f48a9]
+/afs/ece.cmu.edu/support/xilinx/xilinx.release/Vivado-2015.2/Vivado/2015.2/tps/lnx64/jre/lib/amd64/server/libjvm.so(JVM_handle_linux_signal+0xb6) [0x7f742b1fa4f6]
+/afs/ece.cmu.edu/support/xilinx/xilinx.release/Vivado-2015.2/Vivado/2015.2/tps/lnx64/jre/lib/amd64/server/libjvm.so(+0x8e2523) [0x7f742b1f1523]
+/lib64/libc.so.6(+0x35650) [0x7f7461491650]
+/afs/ece.cmu.edu/support/xilinx/xilinx.release/Vivado-2015.2/Vivado/2015.2/lib/lnx64.o/libstdc++.so.6(_ZNSt8__detail15_List_node_base7_M_hookEPS0_+0xf) [0x7f7461aa0bcf]
+/afs/ece.cmu.edu/support/xilinx/xilinx.release/Vivado-2015.2/Vivado/2015.2/lib/lnx64.o/librdi_filemgmt.so(HADGHdlDbObject::addChild(HADGHdlDbObject*)+0x40) [0x7f743fd7fa70]
+/afs/ece.cmu.edu/support/xilinx/xilinx.release/Vivado-2015.2/Vivado/2015.2/lib/lnx64.o/librdi_filemgmt.so(HADGHdlDbObject::HADGHdlDbObject(char const*, HADGHdlDbObject*)+0x5c) [0x7f743fd7fb0c]
+/afs/ece.cmu.edu/support/xilinx/xilinx.release/Vivado-2015.2/Vivado/2015.2/lib/lnx64.o/librdi_filemgmt.so(HADGHdlElement::HADGHdlElement(char const*, HADGHdlDbObject*)+0x9) [0x7f743fd7fc99]
+/afs/ece.cmu.edu/support/xilinx/xilinx.release/Vivado-2015.2/Vivado/2015.2/lib/lnx64.o/librdi_filemgmt.so(HADGHdlCompInst::HADGHdlCompInst(std::string const&, std::string const&, HADGHdlDbObject*)+0x1c) [0x7f743fd7b60c]
+/afs/ece.cmu.edu/support/xilinx/xilinx.release/Vivado-2015.2/Vivado/2015.2/lib/lnx64.o/librdi_filemgmt.so(HADGParserConfigHolder::StoreCompInst(std::string const&, std::string const&, int)+0xe7) [0x7f743fd876b7]
+/afs/ece.cmu.edu/support/xilinx/xilinx.release/Vivado-2015.2/Vivado/2015.2/lib/lnx64.o/librdi_filemgmt.so(HADGParserVerilogVerific::ExamineInstantiation(HADGParserConfigHolder*, Verific::VeriModuleInstantiation*)+0x15b) [0x7f743fd8d39b]
+/afs/ece.cmu.edu/support/xilinx/xilinx.release/Vivado-2015.2/Vivado/2015.2/lib/lnx64.o/librdi_filemgmt.so(HADGParserVerilogVerific::ExamineModuleItem(HADGParserConfigHolder*, Verific::VeriModuleItem*)+0x105) [0x7f743fd8dc75]
+/afs/ece.cmu.edu/support/xilinx/xilinx.release/Vivado-2015.2/Vivado/2015.2/lib/lnx64.o/librdi_filemgmt.so(HADGParserVerilogVerific::ExamineModule(HADGParserConfigHolder*, Verific::VeriModule*)+0x155) [0x7f743fd8e265]
+/afs/ece.cmu.edu/support/xilinx/xilinx.release/Vivado-2015.2/Vivado/2015.2/lib/lnx64.o/librdi_filemgmt.so(HADGParserSystemVerilogVerific::ExamineModule(HADGParserConfigHolder*, Verific::VeriModule*)+0x1e) [0x7f743fd8ad3e]
+/afs/ece.cmu.edu/support/xilinx/xilinx.release/Vivado-2015.2/Vivado/2015.2/lib/lnx64.o/librdi_filemgmt.so(HADGParserVerilogVerific::ExamineAllModules(HADGParserConfigHolder*)+0x71) [0x7f743fd8c1e1]
+/afs/ece.cmu.edu/support/xilinx/xilinx.release/Vivado-2015.2/Vivado/2015.2/lib/lnx64.o/librdi_filemgmt.so(HADGParserSystemVerilogVerific::analyze(HADGParserConfigHolder*, bool, bool, HDGUIStatus&)+0xb1) [0x7f743fd8ac51]
+/afs/ece.cmu.edu/support/xilinx/xilinx.release/Vivado-2015.2/Vivado/2015.2/lib/lnx64.o/librdi_filemgmt.so(HADGParserConfigHolder::analyzeFile(bool, HSTVector<HDDASrcFile*, std::allocator<HDDASrcFile*> >&, HDGUIStatus&, std::string const&)+0x15f) [0x7f743fd8942f]
+/afs/ece.cmu.edu/support/xilinx/xilinx.release/Vivado-2015.2/Vivado/2015.2/lib/lnx64.o/librdi_filemgmt.so(HADGDesignGraph::analyzeFiles_(bool, HDGUIStatus&)+0x793) [0x7f743fd53db3]
+/afs/ece.cmu.edu/support/xilinx/xilinx.release/Vivado-2015.2/Vivado/2015.2/lib/lnx64.o/librdi_filemgmt.so(HADGDesignGraph::updateGraph(bool, HDGUIStatus*)+0x1be) [0x7f743fd548ee]
+/afs/ece.cmu.edu/support/xilinx/xilinx.release/Vivado-2015.2/Vivado/2015.2/lib/lnx64.o/librdi_tcltasks.so(HTCDesignCommands::updateGraph(HADGDesignGraph*, HDDATypes::SourceMgmtMode, bool, HDGUIStatus*)+0x2a) [0x7f742ef58cfa]
+/afs/ece.cmu.edu/support/xilinx/xilinx.release/Vivado-2015.2/Vivado/2015.2/lib/lnx64.o/librdi_tcltasks.so(Java_ui_frmwork_designcmds_HTCDesignCommands_1updateGraph+0x24) [0x7f742f098dc4]
+[0x7f741b2ce6d4]

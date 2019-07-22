@@ -1,3 +1,23 @@
+//============================================================================
+//  Arcade: Asteroids-Deluxe
+//
+//  Port to MiSTer
+//  Copyright (C) 2018 
+//
+//  This program is free software; you can redistribute it and/or modify it
+//  under the terms of the GNU General Public License as published by the Free
+//  Software Foundation; either version 2 of the License, or (at your option)
+//  any later version.
+//
+//  This program is distributed in the hope that it will be useful, but WITHOUT
+//  ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
+//  FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License for
+//  more details.
+//
+//  You should have received a copy of the GNU General Public License along
+//  with this program; if not, write to the Free Software Foundation, Inc.,
+//  51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
+//============================================================================
 
 module emu
 (
@@ -64,32 +84,24 @@ assign LED_POWER = 0;
 assign HDMI_ARX = status[1] ? 8'd16 : 8'd4;
 assign HDMI_ARY = status[1] ? 8'd9  : 8'd3;
 
-
 `include "build_id.v" 
 localparam CONF_STR = {
-	"A.LLANDER;;",
+	"A.BATTLEZONE;;",
 	"F,rom;", // allow loading of alternate ROMs
 	"-;",
 	"O1,Aspect Ratio,Original,Wide;",
 //	"O2,Orientation,Vert,Horz;",
-	"O35,Scandoubler Fx,None,HQ2x,CRT 25%,CRT 50%,CRT 75%;",  
-	"O7,Test,Off,On;", 
-	"O89,Language,English,Spanish,French,German;",
-	"OAC,Fuel,450,600,750,900,1100,1300,1550,1800;",
+	"O34,Language,English,German,French,Spanish;",
+//	"O56,Ships,2-4,3-5,4-6,5-7;", system locks up when activating above 3-5
 	"-;",
 	"R0,Reset;",
-	"J1,Fire,Thrust,Hyperspace,Start;",	
+	"J1,Fire,Thrust,Shield,Start;",	
 	"V,v",`BUILD_DATE
 };
-// 00010000
-// on is 0
-//wire [7:0] m_dip = {~status[12:11],1'b1,~status[10],~status[9:8],1'b0,1'b0};
-wire [7:0] m_dip = {1'b0,1'b0,status[8],status[9],~status[10],1'b1,status[11],status[12]};
-//wire [7:0] m_dip = 8'b00010000;
 
 ////////////////////   CLOCKS   ///////////////////
 
-wire clk_6, clk_25,clk_24;
+wire clk_6, clk_25;
 wire pll_locked;
 
 pll pll
@@ -98,7 +110,6 @@ pll pll
 	.rst(0),
 	.outclk_0(clk_6),	
 	.outclk_1(clk_25),	
-	.outclk_2(clk_24),	
 	.locked(pll_locked)
 );
 
@@ -107,7 +118,6 @@ pll pll
 
 wire [31:0] status;
 wire  [1:0] buttons;
-wire        forced_scandoubler;
 
 wire        ioctl_download;
 wire        ioctl_wr;
@@ -118,6 +128,7 @@ wire [10:0] ps2_key;
 
 wire [15:0] joy_0, joy_1;
 wire [15:0] joy = joy_0 | joy_1;
+wire        forced_scandoubler;
 
 hps_io #(.STRLEN($size(CONF_STR)>>3)) hps_io
 (
@@ -156,15 +167,14 @@ always @(posedge clk_25) begin
 			'h004: btn_coin  			<= pressed; // F3
 			'h04b: btn_thrust  			<= pressed; // L
 			'h042: btn_shield  			<= pressed; // K
-//			'hX75: btn_up          <= pressed; // up
-//			'hX72: btn_down        <= pressed; // down
 			'hX6B: btn_left        <= pressed; // left
 			'hX74: btn_right       <= pressed; // right
 			'h014: btn_fire        <= pressed; // ctrl
 			'h011: btn_thrust      <= pressed; // Lalt
 			'h029: btn_shield      <= pressed; // space
 			// JPAC/IPAC/MAME Style Codes
-			'h016: btn_start_1     <= pressed; // 1
+			'h016: btn_one_player  <= pressed; // 1
+			'h01E: btn_two_players <= pressed; // 2
 			'h02E: btn_coin        <= pressed; // 5
 			'h036: btn_coin        <= pressed; // 6
 			
@@ -180,51 +190,25 @@ reg btn_fire = 0;
 reg btn_coin = 0;
 reg btn_thrust = 0;
 reg btn_shield = 0;
-reg btn_start_1=0;
 
-wire [7:0] BUTTONS = {~btn_right & ~joy[0],~btn_left & ~joy[1],~(btn_one_player|btn_start_1) & ~joy[7],~btn_two_players,~btn_fire & ~joy[4],~btn_coin & ~joy[7],~btn_thrust & ~joy[5],~btn_shield & ~joy[6]};
+wire [7:0] BUTTONS = {~btn_right & ~joy[0],~btn_left & ~joy[1],~btn_one_player & ~joy[7],~btn_two_players,~btn_fire & ~joy[4],~btn_coin & ~joy[7],~btn_thrust & ~joy[5],~btn_shield & ~joy[6]};
+
+///////////////////////////////////////////////////////////////////
+
 wire hblank, vblank;
-/*
-wire hs, vs;
-wire [2:0] r,g;
-wire [2:0] b;
-
-reg ce_pix;
-always @(posedge clk_24) begin
-        reg old_clk;
-
-        old_clk <= clk_6;
-        ce_pix <= old_clk & ~clk_6;
-end
-
-arcade_fx #(640,9) arcade_video
-(
-        .*,
-
-        .clk_video(clk_24),
-
-        .RGB_in({r,g,b}),
-        .HBlank(hblank),
-        .VBlank(vblank),
-        .HSync(~hs),
-        .VSync(~vs),
-
-        .fx(status[5:3])
-);
-*/
 wire ce_vid = 1; 
 wire hs, vs;
-wire [3:0] r,g;
-wire [3:0] b;
+wire rde, rhs, rvs;
+wire [2:0] r,g,rr,rg;
+wire [2:0] b,rb;
 
 assign VGA_CLK  = clk_25; 
 assign VGA_CE   = ce_vid;
-assign VGA_R    = {r,r};
-assign VGA_G    = {g,g};
-assign VGA_B    = {b,b};
-assign VGA_HS   = ~hs;
+assign VGA_R    = {r,r,r[2:1]};
+assign VGA_G    = {g,g,g[2:1]};
+assign VGA_B    = {b,b,b[2:1]};
+assign VGA_HS   = hs;
 assign VGA_VS   = ~vs;
-assign VGA_DE   = vgade;
 
 assign HDMI_CLK = VGA_CLK;
 assign HDMI_CE  = VGA_CE;
@@ -237,39 +221,32 @@ assign HDMI_VS  = VGA_VS;
 //assign HDMI_SL  = status[2] ? 2'd0   : status[4:3];
 assign HDMI_SL  = 2'd0;
 
-
-wire reset = (RESET | status[0] |  buttons[1] | ioctl_download);
+wire reset = (RESET | status[0] | buttons[1] | ioctl_download);
 wire [7:0] audio;
 assign AUDIO_L = {audio, audio};
 assign AUDIO_R = AUDIO_L;
 assign AUDIO_S = 0;
-wire [1:0] lang = 2'b00;
-wire [1:0] ships = 2'b00;
-wire vgade;
+wire [1:0] lang = status[4:3];
+wire [1:0] ships = status[6:5];
 
-wire[15:0] sw;
-wire [7:0] JB;
-wire  [7:0] JD;
-
-top top(  
-	.clk(clk_6),
-	.sw(sw),
-	.JB(JB),
-	.JD(JD),
+top top(
+.clk(clk_6),
+.rst_l(~reset),
+.sw(0),
+.JB(BUTTONS),
 .vgaRed(r),
-.vgaBlue(b),
 .vgaGreen(g),
+.vgaBlue(b),
 .Hsync(hs),
 .Vsync(vs),
-.ampPWM(ampwm),
-.apmSD(ampsd)
-);
+.ampPWM(audio),
+.ampSD(ampSD),
+.en_r(VGA_DE)
+        );
 /*
 ASTEROIDS_TOP ASTEROIDS_TOP
 (
-
 	.BUTTON(BUTTONS),
-	.SELF_TEST_SWITCH_L(~status[7]), 
 	.LANG(lang),
 	.SHIPS(ships),
 	.AUDIO_OUT(audio),
@@ -281,14 +258,10 @@ ASTEROIDS_TOP ASTEROIDS_TOP
 	.VIDEO_B_OUT(b),
 	.HSYNC_OUT(hs),
 	.VSYNC_OUT(vs),
-	.VGA_DE(vgade),
-	.VID_HBLANK(hblank),
-	.VID_VBLANK(vblank),
-	.DIP(m_dip),
+	.VGA_DE(VGA_DE),
 	.RESET_L (~reset),	
 	.clk_6(clk_6),
 	.clk_25(clk_25)
 );
 */
-
 endmodule

@@ -1,0 +1,20 @@
+2000: e007     JMP:e
+200[?12l[?25h[46;1HVim: Caught deadly signal HUP
+Vim: Finished.
+[46;1H8: 1f60e050 Vector: dY:-160 dX:80 I:7
+200c: 0000ff60 Vector: dY:0 dX:-160 I:7
+2010: 00a0e050 Vector: dY:160 dX:80 I:7
+2014: 8000     Center
+2016: 2000     Halt
+2018: c000     RTS
+201a: 4000     SVEC: dY:0 dX:0 I:0
+201c: a001     JSR:2
+201e: 00500000 Vector: dY:80 dX:0 I:0
+2022: a001     JSR:2
+2024: 1fb00000 Vector: dY:-80 dX:0 I:0
+2028: a001     JSR:2
+202a: 00000050 Vector: dY:0 dX:80 I:0
+202e: a001     JSR:2
+2030: 00001fb0 Vector: dY:0 dX:-80 I:0
+2034: a001     JSR:2
+2036: e000     JMP:0
