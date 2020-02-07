@@ -17,13 +17,13 @@ module lineRegQueue(
 	input  			rst
 );
 
-wire [31:0] [12:0] startX, startY, endX, endY; 
-wire [31:0] valid;
-wire [31:0] writeEn;
-wire [31:0] [3:0] intensity;
+reg [31:0] [12:0] startX, startY, endX, endY; 
+reg [31:0] valid;
+reg [31:0] writeEn;
+reg [31:0] [3:0] intensity;
 
-wire [31:0] wrIndex, reIndex;
-wire [32:0] numFilled;
+reg [31:0] wrIndex, reIndex;
+reg [32:0] numFilled;
 
 genvar i;
 generate
@@ -47,7 +47,7 @@ generate
         end
 endgenerate 
 
-wire lastWrite, write;
+reg lastWrite, write;
 
 assign write = currWrite && !lastWrite;
 

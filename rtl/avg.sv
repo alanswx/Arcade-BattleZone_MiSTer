@@ -15,11 +15,11 @@ module avg_core(
 	input  				vggo
 );
 
-wire zWrEn, scalWrEn, center, jump, jsr, ret;
-wire useZReg, blank, vector;
-wire [15:0] jumpAddr, retAddr; 
-wire signed [12:0] dX, dY;
-wire signed [21:0] dX_buf, dY_buf, nextX_scaled, nextY_scaled, linScale_buf;
+reg zWrEn, scalWrEn, center, jump, jsr, ret;
+reg useZReg, blank, vector;
+reg [15:0] jumpAddr, retAddr; 
+reg signed [12:0] dX, dY;
+reg signed [21:0] dX_buf, dY_buf, nextX_scaled, nextY_scaled, linScale_buf;
 wire [2:0] pcOffset;
 wire [3:0] zVal, decZVal;
 wire signed [7:0] linScale, decLinScale;
@@ -35,15 +35,15 @@ wire decHalt;
 
 wire [2:0] countOut, countIn, instLength;
 
-wire rst;
+reg rst;
 
     //WARNING: don't know how many bits this should be
     //         could cause errors from 2's comp
-wire signed [13:0] currX, nextX, currY, nextY; 
+reg signed [13:0] currX, nextX, currY, nextY; 
 
-wire [3:0] clkCount;
+reg [3:0] clkCount;
 
-wire vggoCap;
+reg vggoCap;
 
     register #(3, 0) countReg(countOut, countIn, countEn, clk, rst || vggoCap);
 

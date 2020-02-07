@@ -229,7 +229,7 @@ assign AUDIO_S = 0;
 wire [1:0] lang = status[4:3];
 wire [1:0] ships = status[6:5];
 
-top top(
+bzonetop bzonetop (
 .clk(clk_6),
 .rst_l(~reset),
 .sw(0),

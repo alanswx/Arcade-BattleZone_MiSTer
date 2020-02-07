@@ -20,7 +20,7 @@
 //////////////////////////////////////////////////////////////////////////////////
 
 
-module top(   
+module bzonetop(   
 	input 			clk, 
 	input 			rst_l,
    input   [15:0] sw,
@@ -37,37 +37,37 @@ module top(
 	);
               
 
-wire[8:0] row;
-wire[9:0] col;
-wire[18:0] w_addr, w_addr_pipe;
-wire[3:0] color_in, lineColor, color_in_pipe;
-wire[12:0] startX, endX, startY, endY, dStartX, dStartY, dEndX, dEndY;
-wire done, en_w,/* en_r, */readyFrame, readyLine, rastReady, blank, en_w_pipe;
-wire lineDone, lineDone_pipe;
-wire lrWrite, full, empty, rst; 
-wire[15:0] pc;
-wire[15:0] inst;
-wire[3:0] dIntensity;
-wire[12:0] pixelX, pixelY;
-wire vggo, vgrst;
+reg [8:0] row;
+reg [9:0] col;
+reg [18:0] w_addr, w_addr_pipe;
+reg [3:0] color_in, lineColor, color_in_pipe;
+reg [12:0] startX, endX, startY, endY, dStartX, dStartY, dEndX, dEndY;
+reg done, en_w,/* en_r, */readyFrame, readyLine, rastReady, blank, en_w_pipe;
+reg lineDone, lineDone_pipe;
+reg lrWrite, full, empty;
+reg [15:0] pc;
+reg [15:0] inst;
+reg [3:0] dIntensity;
+reg [12:0] pixelX, pixelY;
+reg vggo, vgrst;
 
-assign rst = ~rst_l;
+reg rst = ~rst_l;
 assign readyLine = ~empty;
-wire [15:0] address;
-wire [7:0] dataIn, dataOut;
-wire WE, IRQ, NMI, RDY;
+reg [15:0] address;
+reg [7:0] dataIn, dataOut;
+reg WE, IRQ, NMI, RDY;
 
 wire [4:0] [7:0] dataToBram, dataFromBram;
 wire [4:0] [15:0] addrToBram;
 wire [4:0] weEnBram;
 
-wire [4:0] counter3MHz;
-wire [14:0] counter3KHz;
-wire [13:0] counter6KHz;
+reg [4:0] counter3MHz;
+reg [14:0] counter3KHz;
+reg [13:0] counter6KHz;
 
 wire clk_3MHz, clk_3KHz, clk_6KHz;
 
-wire coreReset;
+reg coreReset;
                        
 wire [7:0] vecRamWrData;
 wire [15:0] vecRamWrAddr;
@@ -139,7 +139,7 @@ prog_ROM_wrapper progRom(
 	dataFromBram[3'b010]
 );*/
 
-prog rom(
+prog_rom rom(
 	.clk(clk_3MHz),
 	.addr(prog_rom_addr[13:0]),
 	.data(dataFromBram[3'b010])
@@ -291,7 +291,7 @@ avg_core avgc(
       //mathbox
       //logic[4:0] unmappedMBLatch;
 		
-/*GEHSTOCK      
+/*GEHSTOCK      */
 mathBox mb(
 	addrToBram[3'b100][7:0], 
 	dataToBram[3'b100], 
@@ -299,7 +299,7 @@ mathBox mb(
 	clk_3MHz, 
 	rst, 
    dataFromBram[3'b100]
-);*/
+);
       
       always_ff @(posedge clk) begin
               if(rst) begin
@@ -323,7 +323,7 @@ mathBox mb(
       //m_register #(1) mbLatch_3(.Q(led[11]), .D(unmappedMBLatch[3]), .clr(rst), .en(unmappedMBLatch[3]), .clk(clk));
       //m_register #(1) mbLatch_4(.Q(led[12]), .D(unmappedMBLatch[4]), .clr(rst), .en(unmappedMBLatch[4]), .clk(clk));
       
-  wire[7:0] outputLatch, buttons;
+  reg [7:0] outputLatch, buttons;
        
       //sound
   assign buttons = {{2'b00},{JB[6]},{|JB[5:4]},{JB[3:0]}};
