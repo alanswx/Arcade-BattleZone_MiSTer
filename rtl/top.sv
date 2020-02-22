@@ -51,7 +51,7 @@ reg [3:0] dIntensity;
 reg [12:0] pixelX, pixelY;
 reg vggo, vgrst;
 
-reg rst = ~rst_l;
+wire rst = ~rst_l;
 assign readyLine = ~empty;
 reg [15:0] address;
 reg [7:0] dataIn, dataOut;
@@ -292,6 +292,7 @@ avg_core avgc(
       //logic[4:0] unmappedMBLatch;
 		
 /*GEHSTOCK      */
+/*
 mathBox mb(
 	addrToBram[3'b100][7:0], 
 	dataToBram[3'b100], 
@@ -300,6 +301,7 @@ mathBox mb(
 	rst, 
    dataFromBram[3'b100]
 );
+*/
       
       always_ff @(posedge clk) begin
               if(rst) begin

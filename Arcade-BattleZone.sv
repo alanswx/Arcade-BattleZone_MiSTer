@@ -101,15 +101,16 @@ localparam CONF_STR = {
 
 ////////////////////   CLOCKS   ///////////////////
 
-wire clk_6, clk_25;
+wire clk_6, clk_25, clk_100;
 wire pll_locked;
 
 pll pll
 (
 	.refclk(CLK_50M),
 	.rst(0),
-	.outclk_0(clk_6),	
+	.outclk_0(clk_100),	
 	.outclk_1(clk_25),	
+	.outclk_2(clk_6),	
 	.locked(pll_locked)
 );
 
@@ -230,7 +231,7 @@ wire [1:0] lang = status[4:3];
 wire [1:0] ships = status[6:5];
 
 bzonetop bzonetop (
-.clk(clk_6),
+.clk(clk_100),
 .rst_l(~reset),
 .sw(0),
 .JB(BUTTONS),

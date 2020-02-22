@@ -42,6 +42,9 @@ module VGA_fsm(
     bit[9:0] vCount;
     logic[9:0] row_out;
     logic[3:0] R, G, B;
+	 
+	 reg hblank ;
+	 reg vblank ;
     
     /*vga_counter #(10) hCounter(clk_25, clearH, enH, rst_l, hCount);
     vga_counter #(10) vCounter(clk_25, clearV, enV, rst_l, vCount);
@@ -106,11 +109,19 @@ module VGA_fsm(
             v_sync_val = 1'b1;
         end
         
-        
+        hblank = 1;
+		  vblank = 1;
+		  if (hCount >= H_FP+H_PULSE+H_BP && hCount <= H_MAX) begin
+			hblank=0;
+		 end
+			if (vCount >= V_FP+V_PULSE+V_BP && vCount < V_MAX)
+				vblank=0;
             
     end
+	 
+	 
     
-    assign en_r = (hCount >= H_FP+H_PULSE+H_BP) && (vCount >= V_FP+V_PULSE+V_BP);
+    assign en_r = ~(hblank|vblank);//(hCount >= H_FP+H_PULSE+H_BP) && (vCount >= V_FP+V_PULSE+V_BP);
     
     //pixel
     always_comb begin
