@@ -139,7 +139,7 @@ prog_ROM_wrapper progRom(
 	dataFromBram[3'b010]
 );*/
 
-prog_rom rom(
+prog rom(
 	.clk(clk_3MHz),
 	.addr(prog_rom_addr[13:0]),
 	.data(dataFromBram[3'b010])
@@ -207,7 +207,15 @@ vector_ram_diffPorts_wrapper vecRam(
    .readAddr((pc-16'h2000) >> 1'b1), 
 	.dataOut({inst[7:0], inst[15:8]})
 );*/
-  
+   vecramnew vecram(
+	.clock(clk),
+	.data(dataToBram[3'b001]),
+	.rdaddress((pc-16'h2000) >> 1'b1),
+	.wraddress(addrToBram[3'b001]-16'h2000),
+	.wren(weEnBram[3'b001]),
+	.q({inst[7:0], inst[15:8]}));
+
+	/*
   gen_ram #(
 	.dWidth(16),
 	.aWidth(13))
@@ -218,7 +226,7 @@ vecRam(
 	.d(dataToBram[3'b001]), 
 	.q({inst[7:0], inst[15:8]}) 
 	);
-
+*/
 	
     /*
     memStoreQueue memQ(.dataOut(vecRamWrData), .addrOut(vecRamWrAddr), .dataValid(vecRamWrEn), 
