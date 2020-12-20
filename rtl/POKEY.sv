@@ -103,7 +103,7 @@ module POKEY
     end // block: g_AUDIOCHANNEL
   endgenerate
 	
- assign audio = {4{audc}};
+ assign audio = {4{aud}};
 
   volumeMixer finalMix
     (
