@@ -32,6 +32,7 @@ module POKEY
    input logic       readHighWriteLow,
    input logic       cs0Bar,
    output logic      aud,
+	output logic    [3:0] audio,
    //This clk is the 100 MHz clock, and is not a pin on the POKEY DIP
    input logic       clk
    );
@@ -101,6 +102,8 @@ module POKEY
          );
     end // block: g_AUDIOCHANNEL
   endgenerate
+	
+ assign audio = {4{audc}};
 
   volumeMixer finalMix
     (

@@ -35,6 +35,7 @@ module top
    output logic       Hsync, Vsync,
 	output logic       en_r,
 	output logic       hBlank, vBlank,
+	output logic [3:0] audio,
    output logic       ampPWM, ampSD);
 
 
@@ -442,6 +443,7 @@ assign clk=clk_i;
      .readHighWriteLow (~weEnBram[`BRAM_POKEY]),
      .cs0Bar           (pokeyEn),
      .aud              (ampPWM),
+	  .audio (audio),
      .clk              (clk)
      );
 

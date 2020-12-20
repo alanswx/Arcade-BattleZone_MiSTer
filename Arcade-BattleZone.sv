@@ -1,5 +1,5 @@
 //============================================================================
-//  Arcade: Asteroids-Deluxe
+//  Arcade: Battlezone
 //
 //  Port to MiSTer
 //  Copyright (C) 2018 
@@ -18,7 +18,6 @@
 //  with this program; if not, write to the Free Software Foundation, Inc.,
 //  51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 //============================================================================
-
 module emu
 (
 	//Master input clock
@@ -29,14 +28,18 @@ module emu
 	input         RESET,
 
 	//Must be passed to hps_io module
-	inout  [44:0] HPS_BUS,
+	inout  [45:0] HPS_BUS,
 
 	//Base video clock. Usually equals to CLK_SYS.
-	output        VGA_CLK,
+	output        CLK_VIDEO,
 
-	//Multiple resolutions are supported using different VGA_CE rates.
+	//Multiple resolutions are supported using different CE_PIXEL rates.
 	//Must be based on CLK_VIDEO
-	output        VGA_CE,
+	output        CE_PIXEL,
+
+	//Video aspect ratio for HDMI. Most retro systems have ratio 4:3.
+	output [11:0] VIDEO_ARX,
+	output [11:0] VIDEO_ARY,
 
 	output  [7:0] VGA_R,
 	output  [7:0] VGA_G,
@@ -44,25 +47,35 @@ module emu
 	output        VGA_HS,
 	output        VGA_VS,
 	output        VGA_DE,    // = ~(VBlank | HBlank)
+	output        VGA_F1,
+	output [1:0]  VGA_SL,
+	output        VGA_SCALER, // Force VGA scaler
 
-	//Base video clock. Usually equals to CLK_SYS.
-	output        HDMI_CLK,
+	// Use framebuffer from DDRAM (USE_FB=1 in qsf)
+	// FB_FORMAT:
+	//    [2:0] : 011=8bpp(palette) 100=16bpp 101=24bpp 110=32bpp
+	//    [3]   : 0=16bits 565 1=16bits 1555
+	//    [4]   : 0=RGB  1=BGR (for 16/24/32 modes)
+	//
+	// FB_STRIDE either 0 (rounded to 256 bytes) or multiple of 16 bytes.
+	output        FB_EN,
+	output  [4:0] FB_FORMAT,
+	output [11:0] FB_WIDTH,
+	output [11:0] FB_HEIGHT,
+	output [31:0] FB_BASE,
+	output [13:0] FB_STRIDE,
+	input         FB_VBL,
+	input         FB_LL,
+	output        FB_FORCE_BLANK,
 
-	//Multiple resolutions are supported using different HDMI_CE rates.
-	//Must be based on CLK_VIDEO
-	output        HDMI_CE,
+		// Palette control for 8bit modes.
+	// Ignored for other video modes.
+	output        FB_PAL_CLK,
+	output  [7:0] FB_PAL_ADDR,
+	output [23:0] FB_PAL_DOUT,
+	input  [23:0] FB_PAL_DIN,
+	output        FB_PAL_WR,
 
-	output  [7:0] HDMI_R,
-	output  [7:0] HDMI_G,
-	output  [7:0] HDMI_B,
-	output        HDMI_HS,
-	output        HDMI_VS,
-	output        HDMI_DE,   // = ~(VBlank | HBlank)
-	output  [1:0] HDMI_SL,   // scanlines fx
-
-	//Video aspect ratio for HDMI. Most retro systems have ratio 4:3.
-	output  [7:0] HDMI_ARX,
-	output  [7:0] HDMI_ARY,
 
 	output        LED_USER,  // 1 - ON, 0 - OFF.
 
@@ -72,24 +85,38 @@ module emu
 	output  [1:0] LED_POWER,
 	output  [1:0] LED_DISK,
 
+	input         CLK_AUDIO, // 24.576 MHz
 	output [15:0] AUDIO_L,
 	output [15:0] AUDIO_R,
-	output        AUDIO_S    // 1 - signed audio samples, 0 - unsigned
+	output        AUDIO_S,   // 1 - signed audio samples, 0 - unsigned
+	
+	// Open-drain User port.
+	// 0 - D+/RX
+	// 1 - D-/TX
+	// 2..6 - USR2..USR6
+	// Set USER_OUT to 1 to read from USER_IN.
+	input   [6:0] USER_IN,
+	output  [6:0] USER_OUT
 );
 
+assign VGA_F1    = 0;
+assign VGA_SCALER= 0;
+
+assign USER_OUT  = '1;
 assign LED_USER  = ioctl_download;
 assign LED_DISK  = 0;
 assign LED_POWER = 0;
 
-assign HDMI_ARX = status[1] ? 8'd16 : 8'd4;
-assign HDMI_ARY = status[1] ? 8'd9  : 8'd3;
+
+wire [1:0] ar = status[15:14];
+assign VIDEO_ARX =  (!ar) ? ( 8'd4) : (ar - 1'd1);
+assign VIDEO_ARY =  (!ar) ? ( 8'd3) : 12'd0;
 
 `include "build_id.v" 
 localparam CONF_STR = {
 	"A.BATTLEZONE;;",
-	"F,rom;", // allow loading of alternate ROMs
+	"H0OEF,Aspect ratio,Original,Full Screen,[ARC1],[ARC2];",
 	"-;",
-	"O1,Aspect Ratio,Original,Wide;",
 //	"O2,Orientation,Vert,Horz;",
 	"O34,Language,English,German,French,Spanish;",
 //	"O56,Ships,2-4,3-5,4-6,5-7;", system locks up when activating above 3-5
@@ -130,6 +157,7 @@ wire [10:0] ps2_key;
 wire [15:0] joy_0, joy_1;
 wire [15:0] joy = joy_0 | joy_1;
 wire        forced_scandoubler;
+wire [21:0] gamma_bus;
 
 hps_io #(.STRLEN($size(CONF_STR)>>3)) hps_io
 (
@@ -199,33 +227,36 @@ wire [7:0] BUTTONS = {~btn_right & ~joy[0],~btn_left & ~joy[1],~btn_one_player &
 wire hblank, vblank;
 wire ce_vid = 1; 
 wire hs, vs;
-wire rde, rhs, rvs;
-wire [3:0] r,g,rr,rg;
-wire [3:0] b,rb;
+wire [3:0] r,g,b;
 
-assign VGA_CLK  = clk_25; 
-assign VGA_CE   = ce_vid;
-assign VGA_R    = {r,r};
-assign VGA_G    = {g,g};
-assign VGA_B    = {b,b};
-assign VGA_HS   = ~hs;
-assign VGA_VS   = ~vs;
+reg ce_pix;
+always @(posedge clk_50) begin
+       ce_pix <= !ce_pix;
+end
+arcade_video #(640,12) arcade_video
+(
+        .*,
 
-assign HDMI_CLK = VGA_CLK;
-assign HDMI_CE  = VGA_CE;
-assign HDMI_R   = VGA_R ;
-assign HDMI_G   = VGA_G ;
-assign HDMI_B   = VGA_B ;
-assign HDMI_DE  = VGA_DE;
-assign HDMI_HS  = VGA_HS;
-assign HDMI_VS  = VGA_VS;
-//assign HDMI_SL  = status[2] ? 2'd0   : status[4:3];
-assign HDMI_SL  = 2'd0;
+        .clk_video(clk_50),
 
-//wire reset = (RESET | status[0] | buttons[1] | ioctl_download);
-wire reset = RESET;
-wire [7:0] audio;
-assign AUDIO_L = {audio, audio};
+        .RGB_in({r,g,b}),
+
+        .HBlank(hblank),
+        .VBlank(vblank),
+        .HSync(~hs),
+        .VSync(~vs),
+
+        .forced_scandoubler(0),
+        .fx(0)
+);
+
+
+
+
+wire reset = (RESET | status[0] | buttons[1] | ioctl_download);
+//wire reset = RESET;
+wire [3:0] audio;
+assign AUDIO_L = {audio, audio,8'b0};
 assign AUDIO_R = AUDIO_L;
 assign AUDIO_S = 0;
 wire [1:0] lang = status[4:3];
@@ -235,7 +266,7 @@ top bzonetop(
 .clk_i(clk_50),
 .btnCpuReset(~reset),
 .sw(16'b0),
-.JB(BUTTONS),
+.JB(~BUTTONS),
 .JD(),
 .vgaRed(r),
 .vgaGreen(g),
@@ -244,61 +275,10 @@ top bzonetop(
 .Vsync(vs),
 .hBlank(hblank),
 .vBlank(vblank),
-.en_r(VGA_DE),
-.ampPWM(audio),
-.ampSD(ampSD));
+.en_r(),
+.audio(audio),
+.ampPWM(),
+.ampSD());
 
 
-/*
-module top
-  #
-  (
-   parameter          CLK_DIV = "TRUE"
-   )
-  (
-   input wire         clk_i, btnCpuReset,
-   input wire [15:0]  sw,
-   input wire [7:0]   JB,
-   output logic [7:0] JD,
-   output logic [3:0] vgaRed, vgaBlue, vgaGreen,
-   output logic       Hsync, Vsync,
-   output logic       ampPWM, ampSD);
-*/
-/*
-bzonetop bzonetop (
-.clk(clk_25),
-.rst_l(~reset),
-.sw(0),
-.JB(BUTTONS),
-.vgaRed(r),
-.vgaGreen(g),
-.vgaBlue(b),
-.Hsync(hs),
-.Vsync(vs),
-.ampPWM(audio),
-.ampSD(ampSD),
-.en_r(VGA_DE)
-        );
-*/
-/*
-ASTEROIDS_TOP ASTEROIDS_TOP
-(
-	.BUTTON(BUTTONS),
-	.LANG(lang),
-	.SHIPS(ships),
-	.AUDIO_OUT(audio),
-	.dn_addr(ioctl_addr[15:0]),
-	.dn_data(ioctl_dout),
-	.dn_wr(ioctl_wr),	
-	.VIDEO_R_OUT(r),
-	.VIDEO_G_OUT(g),
-	.VIDEO_B_OUT(b),
-	.HSYNC_OUT(hs),
-	.VSYNC_OUT(vs),
-	.VGA_DE(VGA_DE),
-	.RESET_L (~reset),	
-	.clk_6(clk_6),
-	.clk_25(clk_25)
-);
-*/
 endmodule
