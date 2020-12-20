@@ -101,14 +101,14 @@ localparam CONF_STR = {
 
 ////////////////////   CLOCKS   ///////////////////
 
-wire clk_6, clk_25, clk_100;
+wire clk_6, clk_25, clk_50;
 wire pll_locked;
 
 pll pll
 (
 	.refclk(CLK_50M),
 	.rst(0),
-	.outclk_0(clk_100),	
+	.outclk_0(clk_50),	
 	.outclk_1(clk_25),	
 	.outclk_2(clk_6),	
 	.locked(pll_locked)
@@ -232,8 +232,8 @@ wire [1:0] lang = status[4:3];
 wire [1:0] ships = status[6:5];
 
 top bzonetop(
-.clk_i(clk_100),
-.btnCpuReset(reset),
+.clk_i(clk_50),
+.btnCpuReset(~reset),
 .sw(16'b0),
 .JB(BUTTONS),
 .JD(),
@@ -242,6 +242,8 @@ top bzonetop(
 .vgaBlue(b),
 .Hsync(hs),
 .Vsync(vs),
+.hBlank(hblank),
+.vBlank(vblank),
 .en_r(VGA_DE),
 .ampPWM(audio),
 .ampSD(ampSD));

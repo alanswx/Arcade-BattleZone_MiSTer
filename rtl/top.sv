@@ -34,6 +34,7 @@ module top
    output logic [3:0] vgaRed, vgaBlue, vgaGreen,
    output logic       Hsync, Vsync,
 	output logic       en_r,
+	output logic       hBlank, vBlank,
    output logic       ampPWM, ampSD);
 
 
@@ -214,8 +215,16 @@ assign clk=clk_i;
      .clk_en      (clk_3MHz_en),
      .dout        (dataFromBram[`BRAM_PROG_ROM])
      );
-
-
+	  
+  /*
+  prog progRom
+  (
+	  .addr        (prog_rom_addr[13:0]),
+     .clk         (clk),
+     //.clk_en      (clk_3MHz_en),
+     .data        (dataFromBram[`BRAM_PROG_ROM])
+	);
+*/
   sp_ram
     #
     (
@@ -350,7 +359,9 @@ assign clk=clk_i;
      .col            (col),
      .Hsync          (Hsync),
      .Vsync          (Vsync),
-     .en_r           (en_r)
+     .en_r           (en_r),
+	  .vBlank         (vBlank),
+	  .hBlank         (hBlank)
      );
 
   fb_controller fbc

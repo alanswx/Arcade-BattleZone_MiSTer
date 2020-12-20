@@ -24,7 +24,7 @@ module VGA_fsm
    input wire         clk, rst,
    output logic [8:0] row,
    output logic [9:0] col,
-   output logic       Hsync, Vsync, en_r
+   output logic       Hsync, Vsync, en_r, hBlank, vBlank
    );
 
   wire [9:0]          H_MAX = 800;
@@ -124,6 +124,8 @@ module VGA_fsm
     end
 
     assign en_r = (hCount >= H_FP+H_PULSE+H_BP) && (vCount >= V_FP+V_PULSE+V_BP);
+    assign hBlank = hCount >= H_FP+H_PULSE+H_BP;
+    assign vBlank = vCount >= V_FP+V_PULSE+V_BP;
 
     //pixel
     always_comb begin
