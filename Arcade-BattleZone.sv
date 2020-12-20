@@ -122,7 +122,7 @@ localparam CONF_STR = {
 //	"O56,Ships,2-4,3-5,4-6,5-7;", system locks up when activating above 3-5
 	"-;",
 	"R0,Reset;",
-	"J1,Fire,Thrust,Shield,Start;",	
+	"J1,Up,down,fire,Start 1P,Start 2P,Coin;",	
 	"V,v",`BUILD_DATE
 };
 
@@ -222,10 +222,17 @@ reg btn_shield = 0;
 
 wire [7:0] BUTTONS = {~btn_right & ~joy[0],~btn_left & ~joy[1],~btn_one_player & ~joy[7],~btn_two_players,~btn_fire & ~joy[4],~btn_coin & ~joy[7],~btn_thrust & ~joy[5],~btn_shield & ~joy[6]};
 
+wire [7:0] DSW0 = {8'b0};
+wire [7:0] DSW1 = {8'b0};
+wire [7:0] JB = { /* 7 coin */  joy[9],joy[8],joy[7],joy[6],joy[4],joy[5],joy[2],joy[3]};
+wire [15:0] sw = { DSW1,DSW0};
+//  assign buttons = {{2'b00},{JB[6]},{|JB[5:4]},{JB[3:0]}};
+//  7-> coin
+
+
 ///////////////////////////////////////////////////////////////////
 
 wire hblank, vblank;
-wire ce_vid = 1; 
 wire hs, vs;
 wire [3:0] r,g,b;
 
@@ -243,8 +250,8 @@ arcade_video #(640,12) arcade_video
 
         .HBlank(hblank),
         .VBlank(vblank),
-        .HSync(~hs),
-        .VSync(~vs),
+        .HSync(hs),
+        .VSync(vs),
 
         .forced_scandoubler(0),
         .fx(0)
@@ -265,8 +272,8 @@ wire [1:0] ships = status[6:5];
 top bzonetop(
 .clk_i(clk_50),
 .btnCpuReset(~reset),
-.sw(16'b0),
-.JB(~BUTTONS),
+.sw(sw),
+.JB(JB),
 .JD(),
 .vgaRed(r),
 .vgaGreen(g),
