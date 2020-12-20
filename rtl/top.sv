@@ -1,422 +1,490 @@
 `timescale 1ns / 1ps
+`default_nettype none
 //////////////////////////////////////////////////////////////////////////////////
-// Company: 
-// Engineer: 
-// 
+// Company:
+// Engineer:
+//
 // Create Date: 10/28/2015 01:24:09 PM
-// Design Name: 
+// Design Name:
 // Module Name: top
-// Project Name: 
-// Target Devices: 
-// Tool Versions: 
-// Description: 
-// 
-// Dependencies: 
-// 
+// Project Name:
+// Target Devices:
+// Tool Versions:
+// Description:
+//
+// Dependencies:
+//
 // Revision:
 // Revision 0.01 - File Created
 // Additional Comments:
-// 
+//
 //////////////////////////////////////////////////////////////////////////////////
+`include "coreInterface.vh"
+
+module top
+  #
+  (
+   parameter          CLK_DIV = "TRUE"
+   )
+  (
+   input wire         clk_i, btnCpuReset,
+   input wire [15:0]  sw,
+   input wire [7:0]   JB,
+   output logic [7:0] JD,
+   output logic [3:0] vgaRed, vgaBlue, vgaGreen,
+   output logic       Hsync, Vsync,
+	output logic       en_r,
+   output logic       ampPWM, ampSD);
 
 
-module bzonetop(   
-	input 			clk, 
-	input 			rst_l,
-   input   [15:0] sw,
-   input 	[7:0] JB,
-   output 	[7:0] JD,
-   output 	[3:0] vgaRed, 
-	output 	[3:0] vgaBlue, 
-	output 	[3:0] vgaGreen,
-   output			Hsync, 
-   output			Vsync,
-   output			ampPWM, 
-   output			ampSD,
-	output			en_r
-	);
-              
+  logic [8:0]         row;
+  logic [9:0]         col;
+  logic [18:0]        w_addr, w_addr_pipe;
+  logic [3:0]         color_in, lineColor, color_in_pipe;
+  logic [12:0]        startX, endX, startY, endY, dStartX, dStartY, dEndX, dEndY;
+  logic               en_w, /*en_r,*/ readyFrame, readyLine, rastReady, en_w_pipe;
+  logic               lineDone, lineDone_pipe;
+  logic               full;
+  logic               empty;
+  logic               rst;
+  logic               lrWrite;
+  logic [15:0]        pc;
+  logic [15:0]        inst;
+  logic [3:0]         dIntensity;
+  logic [12:0]        pixelX, pixelY;
+  logic               rst_l;
+  logic               vggo, vgrst;
 
-reg [8:0] row;
-reg [9:0] col;
-reg [18:0] w_addr, w_addr_pipe;
-reg [3:0] color_in, lineColor, color_in_pipe;
-reg [12:0] startX, endX, startY, endY, dStartX, dStartY, dEndX, dEndY;
-reg done, en_w,/* en_r, */readyFrame, readyLine, rastReady, blank, en_w_pipe;
-reg lineDone, lineDone_pipe;
-reg lrWrite, full, empty;
-reg [15:0] pc;
-reg [15:0] inst;
-reg [3:0] dIntensity;
-reg [12:0] pixelX, pixelY;
-reg vggo, vgrst;
+  assign rst = ~rst_l;
+  assign readyLine = ~empty;
 
-wire rst = ~rst_l;
-assign readyLine = ~empty;
-reg [15:0] address;
-reg [7:0] dataIn, dataOut;
-reg WE, IRQ, NMI, RDY;
+  logic               rst_unstable;
+  logic               clk;
 
-wire [4:0] [7:0] dataToBram, dataFromBram;
-wire [4:0] [15:0] addrToBram;
-wire [4:0] weEnBram;
+  always @(posedge clk) begin
+    rst_unstable <= btnCpuReset;
+    rst_l        <= rst_unstable;
+  end
 
-reg [4:0] counter3MHz;
-reg [14:0] counter3KHz;
-reg [13:0] counter6KHz;
+  logic [15:0] address;
+  logic [7:0]  dataIn, dataOut;
+  logic        WE, IRQ, NMI, RDY;
 
-wire clk_3MHz, clk_3KHz, clk_6KHz;
+  logic [4:0] [7:0] dataToBram, dataFromBram;
+  logic [4:0] [15:0] addrToBram;
+  logic [4:0]        weEnBram;
+  logic              clk_3MHz, clk_3KHz, clk_6KHz;
+  logic              clk_3MHz_en;
+  logic              clk_6MHz_en;
+  logic              clk_3KHz_en;
+  logic              clk_6KHz_en;
 
-reg coreReset;
-                       
-wire [7:0] vecRamWrData;
-wire [15:0] vecRamWrAddr;
-wire vecRamWrEn, qCanWrite;
+  logic              coreReset;
 
-wire [15:0] vecRamAddr2, prog_rom_addr;
-assign prog_rom_addr = addrToBram[3'b010]-16'h5000;
+  logic [15:0]       prog_rom_addr;
+  assign prog_rom_addr = addrToBram[`BRAM_PROG_ROM]-16'h5000;
 
-wire avg_halt, self_test;
-    
-assign self_test = 1'b1;
+  logic              avg_halt;
+  logic              self_test;
 
-    always_ff @(posedge clk) begin
+  assign self_test = 1'b1;
+
+  logic              locked;
+
+/*  main_clock clocks
+    (
+     .clk_out1  (clk),
+     //.reset(rst),
+     .reset     (1'b0),
+     .locked    (locked),
+     .clk_in1   (clk_i)
+     );
+	  */
+assign clk=clk_i;
+
+  generate
+    if (CLK_DIV == "TRUE") begin : g_CLK_DIV
+      logic [3:0]        counter3MHz;
+      logic [13:0]       counter3KHz;
+      logic [12:0]       counter6KHz;
+
+      initial begin
+        counter3MHz = 'd8;
+        counter3KHz = 'd8192;
+        counter6KHz = 'd4096;
+      end
+      always @(posedge clk) begin
         if(rst) begin
-            counter3MHz <= 'd16;
-            counter3KHz <= 'd16384;
-            counter6KHz <= 'd8192;
+          counter3MHz <= 'd8;
+          counter3KHz <= 'd8192;
+          counter6KHz <= 'd4096;
         end else begin
-            counter3MHz <= counter3MHz + 'd1;
-            counter3KHz <= counter3KHz + 'd1;
-            counter6KHz <= counter6KHz + 'd1;
+          counter3MHz <= counter3MHz + 'd1;
+          counter3KHz <= counter3KHz + 'd1;
+          counter6KHz <= counter6KHz + 'd1;
         end
+      end
+
+      assign clk_3MHz = (counter3MHz > 'd7);
+      assign clk_3KHz = (counter3KHz > 'd8191);
+      assign clk_6KHz = (counter6KHz > 'd4096);
+      assign clk_3MHz_en = counter3MHz == 'd7;
+      assign clk_6MHz_en = counter3MHz[2:0] == 4'd7;
+      assign clk_3KHz_en = counter3KHz == 'd8191;
+      assign clk_6KHz_en = counter6KHz == 'd4096;
+
+    end else begin : g_NO_CLK_DIV
+
+      logic [4:0] counter3MHz;
+      logic [14:0] counter3KHz;
+      logic [13:0] counter6KHz;
+
+      initial begin
+        counter3MHz = 'd16;
+        counter3KHz = 'd16384;
+        counter6KHz = 'd8192;
+      end
+      always @(posedge clk) begin
+        if(rst) begin
+          counter3MHz <= 'd16;
+          counter3KHz <= 'd16384;
+          counter6KHz <= 'd8192;
+        end else begin
+          counter3MHz <= counter3MHz + 'd1;
+          counter3KHz <= counter3KHz + 'd1;
+          counter6KHz <= counter6KHz + 'd1;
+        end
+      end
+
+      assign clk_3MHz = (counter3MHz > 'd15);
+      assign clk_3KHz = (counter3KHz > 'd16383);
+      assign clk_6KHz = (counter6KHz > 'd8192);
+      assign clk_3MHz_en = counter3MHz == 'd15;
+      assign clk_6MHz_en = counter3MHz[3:0] == 5'd15;
+      assign clk_3KHz_en = counter3KHz == 'd16383;
+      assign clk_6KHz_en = counter6KHz == 'd8192;
+
+    end // else: !if(CLK_DIV == "TRUE")
+  endgenerate
+
+  always_ff @(posedge clk) begin
+    if (rst)              coreReset <= 1'b1;
+    else if (clk_3MHz_en) coreReset <= 1'b0;
+  end
+
+  cpu core
+    (
+     .clk            (clk),
+     .clk_en         (clk_3MHz_en),
+     .reset          (coreReset),
+     .AB             (address),
+     .DI             (dataIn),
+     .DO             (dataOut),
+     .WE             (WE),
+     .IRQ            (IRQ),
+     .NMI            (NMI),
+     .RDY            (RDY)
+     );
+
+  addrDecoder ad
+    (
+     .dataToCore     (dataIn),
+     .addrToBram     (addrToBram),
+     .dataToBram     (dataToBram),
+     .weEnBram       (weEnBram),
+     .vggo           (vggo),
+     .vgrst          (vgrst),
+     .dataFromCore   (dataOut),
+     .addr           ({1'b0, address[14:0]}),
+     .dataFromBram   (dataFromBram),
+     .we             (WE),
+     .halt           (avg_halt),
+     .clk            (clk),
+     .clk_3KHz       (clk_3KHz),
+     .clk_en         (clk_3MHz_en),
+     .self_test      (self_test),
+     .option_switch  (sw),
+     .coin           (JB[7:7])
+     );
+
+  prog_rom progRom
+    (
+     .addr        (prog_rom_addr[13:0]),
+     .clk         (clk),
+     .clk_en      (clk_3MHz_en),
+     .dout        (dataFromBram[`BRAM_PROG_ROM])
+     );
+
+
+  sp_ram
+    #
+    (
+     .DATA        (8),
+     .ADDR        (10)
+     )
+  progRam
+    (
+     .clk         (clk),
+     .clk_en      (clk_3MHz_en),
+     .addr        (addrToBram[`BRAM_PROG_RAM][9:0]),
+     .din         (dataToBram[`BRAM_PROG_RAM]),
+     .dout        (dataFromBram[`BRAM_PROG_RAM]),
+     .wr          (weEnBram[`BRAM_PROG_RAM])
+     );
+
+  (* ram_style = "block" *) logic [7:0] vecram2_store[8192];
+  initial begin
+    $readmemh("avg_clean2.mem", vecram2_store, 0, 8191);
+  end
+  always @(posedge clk) begin
+    if (clk_3MHz_en) begin
+      if (weEnBram[`BRAM_VECTOR]) vecram2_store[addrToBram[`BRAM_VECTOR][12:0]] <= dataToBram[`BRAM_VECTOR];
+      dataFromBram[`BRAM_VECTOR] <= vecram2_store[addrToBram[`BRAM_VECTOR][12:0]];
     end
+  end
 
-assign clk_3MHz = (counter3MHz > 'd15);
-assign clk_3KHz = (counter3KHz > 'd16383);
-assign clk_6KHz = (counter6KHz > 'd8192);
+  logic [15:0] vec_ram_write_addr;
+  logic [15:0] vec_ram_read_addr;
 
-    always_ff @(posedge clk) begin
-        if(rst) coreReset <= 1'b1;
-        else if(clk_3MHz) coreReset <= 1'b0;
+  assign vec_ram_write_addr = addrToBram[`BRAM_VECTOR]-16'h2000;
+  assign vec_ram_read_addr  = pc - 16'h2000;
+
+  (* ram_style = "block" *) logic [7:0] vecram_store[8192];
+  logic [15:0] inst_pipe; // Original implementation had a pipe stage
+  initial begin
+    $readmemh("avg_clean2.mem", vecram_store, 0, 8191);
+  end
+  always @(posedge clk) begin
+    if (weEnBram[`BRAM_VECTOR]) begin
+      vecram_store[vec_ram_write_addr[12:0]] <= dataToBram[`BRAM_VECTOR];
     end
+    inst_pipe[7:0]  <= vecram_store[{vec_ram_read_addr[12:1], 1'b1}];
+    inst_pipe[15:8] <= vecram_store[{vec_ram_read_addr[12:1], 1'b0}];
+    inst            <= inst_pipe;
+  end
 
-cpu core(
-	.clk(clk_3MHz), 
-	.reset(coreReset), 
-	.AB(address), 
-	.DI(dataIn), 
-	.DO(dataOut), 
-	.WE(WE), 
-	.IRQ(IRQ), 
-	.NMI(NMI), 
-	.RDY(RDY)
-);
-
-addrDecoder ad(
-	dataIn, 
-	addrToBram, 
-	dataToBram, 
-	weEnBram, 
-	vggo, 
-	vgrst, 
-	dataOut, 
-	{1'b0, address[14:0]}, 
-   dataFromBram, 
-	WE, 
-	avg_halt, 
-	clk_3KHz, 
-	clk_3MHz, 
-	self_test, 
-	sw, 
-	JB[7:7]
-);
-
-/* GEHSTOCK
-prog_ROM_wrapper progRom(
-	prog_rom_addr[13:0], 
-	clk_3MHz, 
-	dataFromBram[3'b010]
-);*/
-
-prog rom(
-	.clk(clk_3MHz),
-	.addr(prog_rom_addr[13:0]),
-	.data(dataFromBram[3'b010])
-);
-
-/* GEHSTOCK
-prog_RAM_wrapper progRam(
-	addrToBram[3'b000][9:0], 
-	clk_3MHz, 
-	dataToBram[3'b000], 
-   dataFromBram[3'b000], 
-	weEnBram[3'b000]
-);*/
-
-gen_ram #(
-	.dWidth(8),
-	.aWidth(10))
-ram(
-	.clk(clk_3MHz),
-	.we(weEnBram[3'b000]),
-	.addr(addrToBram[3'b000][9:0]),
-	.d(dataToBram[3'b000]),
-	.q(dataFromBram[3'b000])
-	);
-	
-/* GEHSTOCK
-vram_2_wrapper vecRam2(
-	.addr(addrToBram[3'b001][12:0]), 
-	.clk(clk_3MHz), 
-	.dataIn(dataToBram[3'b001]), 
-	.dataOut(dataFromBram[3'b001]), 
-	.we(weEnBram[3'b001])
-);*/
-
-gen_ram #(
-	.dWidth(8),
-	.aWidth(13))
-vecram2(
-	.clk(clk_3MHz),
-	.we(weEnBram[3'b001]),
-	.addr(addrToBram[3'b001][12:0]),
-	.d(dataToBram[3'b001]), 
-	.q(dataFromBram[3'b001]) 
-	);
-   
-    /*
-assign qCanWrite = avg_halt;
-assign vecRamAddr2 = qCanWrite ? vecRamWrAddr : pc + 1;
-    vector_ram_wrapper vecRam(pc-16'h2000, vecRamAddr2-16'h2000, clk, 16'h0, vecRamWrData, inst[15:8], inst[7:0], 1'b0, vecRamWrEn);                               
-    */
-    
-    /*logic lastVecWrite, vecWrite;
-    always_ff @(posedge clk) begin
-        if(rst) lastVecWrite <= 1'b0;
-        else lastVecWrite <= weEnBram[`BRAM_VECTOR];
-    end*/
-    
-    //assign vecWrite = (weEnBram[`BRAM_VECTOR] && !lastVecWrite);
-    /* alanswx
-vector_ram_diffPorts_wrapper vecRam(
-	.clock(clk), 
-	.writeAddr(addrToBram[3'b001]-16'h2000), 
-	.writeData(dataToBram[3'b001]), 
-	.writeEnable(weEnBram[3'b001]), 
-   .readAddr((pc-16'h2000) >> 1'b1), 
-	.dataOut({inst[7:0], inst[15:8]})
-);*/
-   vecramnew vecram(
-	.clock(clk),
-	.data(dataToBram[3'b001]),
-	.rdaddress((pc-16'h2000) >> 1'b1),
-	.wraddress(addrToBram[3'b001]-16'h2000),
-	.wren(weEnBram[3'b001]),
-	.q({inst[7:0], inst[15:8]}));
-
-	/*
-  gen_ram #(
-	.dWidth(16),
-	.aWidth(13))
-vecRam(
-	.clk(clk),
-	.we(weEnBram[3'b001]),
-	.addr(weEnBram[3'b001]?addrToBram[3'b001]-16'h2000:(pc-16'h2000) >> 1'b1),
-	.d(dataToBram[3'b001]), 
-	.q({inst[7:0], inst[15:8]}) 
-	);
-*/
-	
-    /*
-    memStoreQueue memQ(.dataOut(vecRamWrData), .addrOut(vecRamWrAddr), .dataValid(vecRamWrEn), 
-                       .full(memStoreFull), .empty(memStoreEmpty), 
-                       .dataIn(dataToBram[`BRAM_VECTOR]), .addrIn(addrToBram[`BRAM_VECTOR]), 
-                       .canWrite(qCanWrite), .writeEn(weEnBram[`BRAM_VECTOR]), .clk(clk), .rst(rst));       
-    */
-    /*
-wire lastVecWrite;
-    always_ff @(posedge clk) begin
-        if(rst) lastVecWrite <= 1'b0;
-        else lastVecWrite <= weEnBram[`BRAM_VECTOR];
+  logic [3:0]   nmi_counter;
+  initial begin
+    nmi_counter = '0;
+  end
+  always @(posedge clk) begin
+    if (clk_3KHz_en) begin
+      if (rst) nmi_counter <= 'd0;
+      else begin
+        NMI <= (nmi_counter == 'd12);
+        if(nmi_counter == 'd13) nmi_counter <= 'd0;
+        else nmi_counter <= nmi_counter + 1'd1;
+      end
     end
-    
-assign vecRamWrData = dataToBram[`BRAM_VECTOR];
-assign vecRamWrAddr = addrToBram[`BRAM_VECTOR];
-assign vecRamWrEn = weEnBram[`BRAM_VECTOR] && !lastVecWrite;
-    */
+  end
 
-NMICounter nmiC(
-	NMI, 
-	clk_3KHz, 
-	rst, 
-	self_test
-);
+    assign IRQ = 0;
+    assign RDY = 1;
 
-assign IRQ = 0;
-assign RDY = 1;
+  avg_core
+    #
+    (
+     .CLK_DIV        (CLK_DIV)
+     )
+  avgc
+    (
+     .startX         (dStartX),
+     .startY         (dStartY),
+     .endX           (dEndX),
+     .endY           (dEndY),
+     .intensity      (dIntensity),
+     .lrWrite        (lrWrite),
+     .pcOut          (pc),
+     .halt           (avg_halt),
+     .inst           (inst),
+     .clk_in         (clk),
+     .clk_6MHz_en    (clk_6MHz_en),
+     .rst_in         (rst || vgrst),
+     .vggo           (vggo)
+     );
 
-avg_core avgc(
-	.startX(dStartX), 
-	.startY(dStartY), 
-	.endX(dEndX), 
-	.endY(dEndY), 
-   .intensity(dIntensity), 
-	.lrWrite(lrWrite), 
-	.pcOut(pc), 
-	.halt(avg_halt), 
-	.inst(inst), 
-	.clk_in(clk), 
-   .rst_in(rst || vgrst), 
-	.vggo(vggo)
-);
-                    
-    lineRegQueue lrq(.QStartX(startX), .QStartY(startY), .QEndX(endX), .QEndY(endY), 
-                     .QIntensity(lineColor), .full(full), .empty(empty), 
-                     .DStartX(dStartX), .DStartY(dStartY), .DEndX(dEndX), .DEndY(dEndY),
-                                     .DIntensity(dIntensity), .read(lineDone), .currWrite(lrWrite), 
-                                     .clk(clk), .rst(rst));
+  lineRegQueue lrq
+    (
+     .QStartX        (startX),
+     .QStartY        (startY),
+     .QEndX          (endX),
+     .QEndY          (endY),
+     .QIntensity     (lineColor),
+     .full           (full),
+     .empty          (empty),
+     .DStartX        (dStartX),
+     .DStartY        (dStartY),
+     .DEndX          (dEndX),
+     .DEndY          (dEndY),
+     .DIntensity     (dIntensity),
+     .read           (lineDone),
+     .currWrite      (lrWrite),
+     .clk            (clk),
+     .rst            (rst)
+     );
 
-    
-    rasterizer rast(.startX(startX), .endX(endX), .startY(startY), .endY(endY), .lineColor(lineColor), 
-                    .clk(clk), .rst(rst), .readyIn(readyLine), .addressOut(w_addr), 
-                    .pixelX(pixelX), .pixelY(pixelY), .pixelColor(color_in), 
-                    .goodPixel(en_w), .done(lineDone), .rastReady(rastReady));
-                    
-    VGA_fsm vfsm(.clk(clk), .rst(rst), .row(row), .col(col), .Hsync(Hsync), .Vsync(Vsync), .en_r(en_r));
+  rasterizer rast
+    (
+     .startX         (startX),
+     .endX           (endX),
+     .startY         (startY),
+     .endY           (endY),
+     .lineColor      (lineColor),
+     .clk            (clk),
+     .rst            (rst),
+     .readyIn        (readyLine),
+     .addressOut     (w_addr),
+     .pixelX         (pixelX),
+     .pixelY         (pixelY),
+     .pixelColor     (color_in),
+     .goodPixel      (en_w),
+     .done           (lineDone),
+     .rastReady      (rastReady)
+     );
 
-    fb_controller fbc(.w_addr(w_addr_pipe), .en_w(en_w_pipe), .en_r(en_r), 
-                      .halt(avg_halt), .vggo(vggo), .lineDone(lineDone_pipe), .lrqEmpty(empty), 
-                      .clk(clk), .rst(rst), 
-                      .row(row), .col(col), .color_in(color_in_pipe),
-                      .red_out(vgaRed), .blue_out(vgaBlue), .green_out(vgaGreen), .ready(readyFrame));
-    
-   //fb_temp fbt(.w_addr(w_addr_pipe), .en_w(en_w_pipe), .en_r(en_r), .done(avg_halt), .clk(clk), .rst(rst), 
-     //                   .row(row), .col(col), .color_in(color_in_pipe),
-       //                 .red_out(vgaRed), .blue_out(vgaBlue), .green_out(vgaGreen), .ready(readyFrame));
-      
-      
-      //mathbox
-      //logic[4:0] unmappedMBLatch;
-		
-/*GEHSTOCK      */
-/*
-mathBox mb(
-	addrToBram[3'b100][7:0], 
-	dataToBram[3'b100], 
-	weEnBram[3'b100], 
-	clk_3MHz, 
-	rst, 
-   dataFromBram[3'b100]
-);
-*/
-      
-      always_ff @(posedge clk) begin
-              if(rst) begin
-                  w_addr_pipe <= 'd0;
-                  color_in_pipe <= 'd0;
-                  en_w_pipe <= 'd0;
-                  lineDone_pipe <= 'd0;
-              end
-              else begin
-                  w_addr_pipe <= w_addr;
-                  color_in_pipe <= color_in;
-                  en_w_pipe <= en_w;
-                  lineDone_pipe <= lineDone;
-              end  
-       end
-       
-      //assign led[11:8] = unmappedMBLatch;
-      //m_register #(1) mbLatch_0(.Q(led[8]), .D(unmappedMBLatch[0]), .clr(rst), .en(unmappedMBLatch[0]), .clk(clk));
-      //m_register #(1) mbLatch_1(.Q(led[9]), .D(unmappedMBLatch[1]), .clr(rst), .en(unmappedMBLatch[1]), .clk(clk));
-      //m_register #(1) mbLatch_2(.Q(led[10]), .D(unmappedMBLatch[2]), .clr(rst), .en(unmappedMBLatch[2]), .clk(clk));
-      //m_register #(1) mbLatch_3(.Q(led[11]), .D(unmappedMBLatch[3]), .clr(rst), .en(unmappedMBLatch[3]), .clk(clk));
-      //m_register #(1) mbLatch_4(.Q(led[12]), .D(unmappedMBLatch[4]), .clr(rst), .en(unmappedMBLatch[4]), .clk(clk));
-      
-  reg [7:0] outputLatch, buttons;
-       
-      //sound
+  VGA_fsm vfsm
+    (
+     .clk            (clk),
+     .rst            (rst),
+     .row            (row),
+     .col            (col),
+     .Hsync          (Hsync),
+     .Vsync          (Vsync),
+     .en_r           (en_r)
+     );
+
+  fb_controller fbc
+    (
+     .w_addr         (w_addr_pipe),
+     .en_w           (en_w_pipe),
+     .en_r           (en_r),
+     .halt           (avg_halt),
+     .vggo           (vggo),
+     .lineDone       (lineDone_pipe),
+     .lrqEmpty       (empty),
+     .clk            (clk),
+     .rst            (rst),
+     .row            (row),
+     .col            (col),
+     .color_in       (color_in_pipe),
+     .red_out        (vgaRed),
+     .blue_out       (vgaBlue),
+     .green_out      (vgaGreen),
+     .ready          (readyFrame)
+     );
+
+  mathBox mb
+    (
+     .addr           (addrToBram[`BRAM_MATH][7:0]),
+     .DI             (dataToBram[`BRAM_MATH]),
+     .we             (weEnBram[`BRAM_MATH]),
+     .clk            (clk),
+     .clk_en         (clk_3MHz_en),
+     .rst            (rst),
+     .dataOut        (dataFromBram[`BRAM_MATH])
+     );
+
+  always_ff @(posedge clk) begin
+    if(rst) begin
+      w_addr_pipe   <= '0;
+      color_in_pipe <= '0;
+      en_w_pipe     <= '0;
+      lineDone_pipe <= '0;
+    end else begin
+      w_addr_pipe   <= w_addr;
+      color_in_pipe <= color_in;
+      en_w_pipe     <= en_w;
+      lineDone_pipe <= lineDone;
+    end
+  end
+
+  logic[7:0] outputLatch, buttons;
+
+  //sound
   assign buttons = {{2'b00},{JB[6]},{|JB[5:4]},{JB[3:0]}};
-      //assign buttons = 8'b0000_0000;
-  wire pokeyEn;
-  assign pokeyEn = ~(addrToBram[3'b011] >= 16'h1820 && addrToBram[3'b011] < 16'h1830);
-      
-      //output latch for POKEY
-      always_ff @(posedge clk_3MHz) begin
-        if(rst) begin
-            outputLatch <= 'd0;
-        end
-        if(addrToBram[3'b011] == 16'h1840 && weEnBram[3'b011]) begin
-            outputLatch <= dataToBram[3'b011];
-        end
-        else begin
-            outputLatch <= outputLatch;
-        end
+  logic      pokeyEn;
+  assign pokeyEn = ~(addrToBram[`BRAM_POKEY] >= 16'h1820 && addrToBram[`BRAM_POKEY] < 16'h1830);
+
+  //output latch for POKEY
+  always_ff @(posedge clk) begin
+    if (clk_3MHz_en) begin
+      if(rst) begin
+        outputLatch <= 'd0;
       end
+      if(addrToBram[`BRAM_POKEY] == 16'h1840 && weEnBram[`BRAM_POKEY]) begin
+        outputLatch <= dataToBram[`BRAM_POKEY];
+      end
+      else begin
+        outputLatch <= outputLatch;
+      end
+    end // if (clk_3MHz_en)
+  end
   assign ampSD = outputLatch[5];
-      
-      /*
-      always_ff @(posedge clk_3MHz) begin
-        if(rst) begin
-            JD[7:0] <= 'b0;
-        end
-        else begin
-            JD[7:0] <= outputLatch;
-        end
+
+  POKEY pokey
+    (
+     .Din              (dataToBram[`BRAM_POKEY] ),
+     .Dout             (dataFromBram[`BRAM_POKEY]),
+     .A                (addrToBram[`BRAM_POKEY][3:0]),
+     .P                (buttons),
+     .phi2             (clk_3MHz),
+     .readHighWriteLow (~weEnBram[`BRAM_POKEY]),
+     .cs0Bar           (pokeyEn),
+     .aud              (ampPWM),
+     .clk              (clk)
+     );
+
+  logic [15:0] extAud;
+  logic        feedbackAlpha;
+  logic        lfsrOut0, lfsrOut1;
+
+  logic        otherAud0, otherAud1;
+
+  xnor xnor0(feedbackAlpha, extAud[3], extAud[14]);
+
+  assign lfsrOut0 = extAud[15];
+  assign lfsrOut1 = !(&extAud[14:11]);
+
+  always_ff @(posedge clk)
+    if (clk_6KHz_en) begin
+      if (rst | !ampSD) begin
+        extAud <= '0;
+      end else if(ampSD) begin
+        extAud <= (extAud << 1) | feedbackAlpha;
       end
-      */
-    
-POKEY pokey(
-	.Din(dataToBram[3'b011] ), 
-	.Dout(dataFromBram[3'b011]), 
-	.A(addrToBram[3'b011][3:0]), 
-	.P(buttons), 
-	.phi2(clk_3MHz), 
-	.readHighWriteLow(~weEnBram[3'b011]),
-   .cs0Bar(pokeyEn), 
-	.aud(ampPWM), 
-	.clk(clk)
-);
-   
-logic [15:0] extAud;
-logic feedbackAlpha;
-logic lfsrOut0, lfsrOut1;
-logic otherAud0, otherAud1;
-xnor xnor0(feedbackAlpha, extAud[3], extAud[14]);
-assign lfsrOut0 = extAud[15];
-assign lfsrOut1 = !(&extAud[14:11]);
-                       
-m_shift_register #(16) extAudLFSR (
-	.Q(extAud), 
-	.clk(clk_6KHz), 
-	.en(ampSD), 
-	.left(1'b1), 
-	.s_in(feedbackAlpha), 
-	.clr(rst | !ampSD)
-);
-                          
-m_register #(1) freqDiv0(.Q(otherAud0), .D(!otherAud0), .clk(clk_6KHz), .en(lfsrOut0), .clr(rst));
-m_register #(1) freqDiv1(.Q(otherAud1), .D(!otherAud1), .clk(clk_6KHz), .en(lfsrOut1), .clr(rst));
-        
-    assign JD[0] = ~outputLatch[3];
-    assign JD[1] = ~outputLatch[2];
-    assign JD[2] = ~otherAud0;
-    assign JD[3] = ~outputLatch[1];
-    assign JD[4] = ~outputLatch[0];
-    assign JD[5] = ~otherAud1;
-        
-        always_comb begin
-            //motoren
-            if(outputLatch[5]) begin
-                JD[6] = ~outputLatch[7];
-                JD[7] = ~outputLatch[4];
-            end
-            else begin 
-                JD[6] = 1'b1;
-                JD[7] = 1'b1;
-                       
-            end
-        end
-   
-      
+    end
+
+  always_ff @(posedge clk)
+    if (clk_6KHz_en) begin
+      if (rst) begin
+        otherAud0 <= '0;
+        otherAud1 <= '0;
+      end else begin
+        if (lfsrOut0) otherAud0 <= ~otherAud0;
+        if (lfsrOut1) otherAud1 <= ~otherAud1;
+      end
+    end
+
+  assign JD[0] = ~outputLatch[3];
+  assign JD[1] = ~outputLatch[2];
+  assign JD[2] = ~otherAud0;
+  assign JD[3] = ~outputLatch[1];
+  assign JD[4] = ~outputLatch[0];
+  assign JD[5] = ~otherAud1;
+
+  always_comb begin
+    //motoren
+    if(outputLatch[5]) begin
+      JD[6] = ~outputLatch[7];
+      JD[7] = ~outputLatch[4];
+    end
+    else begin
+      JD[6] = 1'b1;
+      JD[7] = 1'b1;
+
+    end
+  end
+
+
 endmodule
+`default_nettype wire

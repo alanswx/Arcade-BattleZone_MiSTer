@@ -1,13 +1,13 @@
 `timescale 1ns / 1ps
-
-
-module memStoreQueue(output logic [7:0]  dataOut, 
-                     output logic [15:0] addrOut, 
-                     output logic        dataValid, 
-                     output logic        full, empty, 
-                     input  logic [7:0]  dataIn, 
-                     input  logic [15:0] addrIn, 
-                     input  logic        canWrite, writeEn, clk, rst);
+`default_nettype none
+`include "coreInterface.vh"
+module memStoreQueue(output logic [7:0]  dataOut,
+                     output logic [15:0] addrOut,
+                     output logic        dataValid,
+                     output logic        full, empty,
+                     input  wire [7:0]  dataIn,
+                     input  wire [15:0] addrIn,
+                     input  wire        canWrite, writeEn, clk, rst);
 
     parameter DEPTH = 128;
 
@@ -17,13 +17,13 @@ module memStoreQueue(output logic [7:0]  dataOut,
 
     logic [$clog2(DEPTH)-1:0] writeIndex, readIndex;
     logic [$clog2(DEPTH):0] numFilled;
-    
+
     logic writeEdge, lastWriteEn;
 
     register #(1) wrEnReg(lastWriteEn, writeEn, 1'b1, clk, rst);
-    
+
     assign writeEdge = (!lastWriteEn && writeEn);
-    
+
     assign full = (numFilled == DEPTH);
     assign empty = (numFilled == 'd0);
 
@@ -47,7 +47,7 @@ module memStoreQueue(output logic [7:0]  dataOut,
                 writeIndex <= writeIndex + 'd1;
                 readIndex <= readIndex + 'd1;
             end
-            
+
             else if(writeEdge && !full) begin
                 dataQueue[writeIndex] <= dataIn;
                 addrQueue[writeIndex] <= addrIn;
@@ -71,3 +71,97 @@ module memStoreQueue(output logic [7:0]  dataOut,
 
 endmodule
 
+module addrDecoder
+  (output logic  [7:0]       dataToCore,
+   output logic [4:0] [15:0] addrToBram,
+   output logic [4:0] [7:0]  dataToBram,
+   output logic [4:0]        weEnBram,
+   output logic              vggo,
+   output logic              vgrst,
+
+   input wire [7:0]         dataFromCore,
+   input wire [15:0]        addr,
+   input wire [4:0] [7:0]   dataFromBram,
+   input wire               we,
+   input wire               halt,
+   input wire               clk,
+   input wire               clk_3KHz,
+   input wire               clk_en,
+   input wire               self_test,
+   input wire [15:0]        option_switch,
+   input wire               coin);
+
+    logic [2:0] bramNum, outBramNum;
+
+    logic [15:0] outBramAddr;
+
+  logic          sound_access;
+  always_ff @(posedge clk) begin
+    if (clk_en) begin
+      outBramNum <= bramNum;
+      outBramAddr <= addr;
+    end
+  end
+
+    assign vggo  = (addr == 16'h1200) && we;
+    assign vgrst = (addr == 16'h1600) && we;
+
+    always_comb begin
+        sound_access = 1'b0;
+        if(addr >= 16'h0 && addr < 16'h0400) bramNum = `BRAM_PROG_RAM;
+        else if(16'h2000 <= addr && addr < 16'h4000) bramNum = `BRAM_VECTOR;
+        else if(16'h5000 <= addr && addr < 16'h8000) bramNum = `BRAM_PROG_ROM;
+        else if(16'h1820 <= addr && addr < 16'h1830) bramNum = `BRAM_POKEY;
+        else if(16'h1840 == addr) begin
+            bramNum = `BRAM_POKEY;
+            sound_access = 1'b1;
+        end
+        else if(addr == 16'h1800 || addr == 16'h1810 || addr == 16'h1818 || (16'h1860 <= addr && addr <= 16'h187f)) bramNum = `BRAM_MATH;
+        else bramNum = 5; //error code
+    end
+
+    logic unmappedAccess, vramWrite, unmappedRead, mathboxAccess;
+
+    always_comb begin
+        mathboxAccess = bramNum == `BRAM_MATH;
+        addrToBram[0] = 'd0;
+        addrToBram[1] = 'd0;
+        addrToBram[2] = 'h5000;
+        addrToBram[3] = 'd0;
+        addrToBram[4] = 'd0;
+        dataToBram[0] = 'd0;
+        dataToBram[1] = 'd0;
+        dataToBram[2] = 'd0;
+        dataToBram[3] = 'd0;
+        dataToBram[4] = 'd0;
+        unmappedAccess = 1'b0;
+        vramWrite = 1'b0;
+        unmappedRead = 1'b0;
+        //dataToCore = dataFromBram[outBramNum];
+        weEnBram = (we << bramNum);
+        dataToBram[bramNum] = dataFromCore;
+        addrToBram[bramNum] = addr;
+
+        if(outBramNum < 5) begin
+            dataToCore = dataFromBram[outBramNum];
+        end
+        else begin
+            case(outBramAddr)
+                16'h800: dataToCore = {clk_3KHz, halt, 1'b1, self_test, 3'b111, coin};
+                16'ha00: dataToCore = option_switch[7:0];//dataToCore = 8'b0001_0101;
+                16'hc00: dataToCore = option_switch[15:8];
+                //16'h1800: dataToCore = 8'b11111111;
+                default: begin
+                    if(outBramAddr != 16'h1400) unmappedAccess = 1;
+                    if(~we) unmappedRead = 1'b1;
+                    dataToCore = 8'd0;
+                end
+            endcase
+        end
+
+        if(bramNum == `BRAM_VECTOR && dataFromCore != 'd0 && we) vramWrite = 1'b1;
+
+    end
+
+endmodule
+`default_nettype wire

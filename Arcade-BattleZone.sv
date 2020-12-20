@@ -200,14 +200,14 @@ wire hblank, vblank;
 wire ce_vid = 1; 
 wire hs, vs;
 wire rde, rhs, rvs;
-wire [2:0] r,g,rr,rg;
-wire [2:0] b,rb;
+wire [3:0] r,g,rr,rg;
+wire [3:0] b,rb;
 
 assign VGA_CLK  = clk_25; 
 assign VGA_CE   = ce_vid;
-assign VGA_R    = {r,r,r[2:1]};
-assign VGA_G    = {g,g,g[2:1]};
-assign VGA_B    = {b,b,b[2:1]};
+assign VGA_R    = {r,r};
+assign VGA_G    = {g,g};
+assign VGA_B    = {b,b};
 assign VGA_HS   = ~hs;
 assign VGA_VS   = ~vs;
 
@@ -222,7 +222,8 @@ assign HDMI_VS  = VGA_VS;
 //assign HDMI_SL  = status[2] ? 2'd0   : status[4:3];
 assign HDMI_SL  = 2'd0;
 
-wire reset = (RESET | status[0] | buttons[1] | ioctl_download);
+//wire reset = (RESET | status[0] | buttons[1] | ioctl_download);
+wire reset = RESET;
 wire [7:0] audio;
 assign AUDIO_L = {audio, audio};
 assign AUDIO_R = AUDIO_L;
@@ -230,8 +231,40 @@ assign AUDIO_S = 0;
 wire [1:0] lang = status[4:3];
 wire [1:0] ships = status[6:5];
 
+top bzonetop(
+.clk_i(clk_100),
+.btnCpuReset(reset),
+.sw(16'b0),
+.JB(BUTTONS),
+.JD(),
+.vgaRed(r),
+.vgaGreen(g),
+.vgaBlue(b),
+.Hsync(hs),
+.Vsync(vs),
+.en_r(VGA_DE),
+.ampPWM(audio),
+.ampSD(ampSD));
+
+
+/*
+module top
+  #
+  (
+   parameter          CLK_DIV = "TRUE"
+   )
+  (
+   input wire         clk_i, btnCpuReset,
+   input wire [15:0]  sw,
+   input wire [7:0]   JB,
+   output logic [7:0] JD,
+   output logic [3:0] vgaRed, vgaBlue, vgaGreen,
+   output logic       Hsync, Vsync,
+   output logic       ampPWM, ampSD);
+*/
+/*
 bzonetop bzonetop (
-.clk(clk_100),
+.clk(clk_25),
 .rst_l(~reset),
 .sw(0),
 .JB(BUTTONS),
@@ -244,6 +277,7 @@ bzonetop bzonetop (
 .ampSD(ampSD),
 .en_r(VGA_DE)
         );
+*/
 /*
 ASTEROIDS_TOP ASTEROIDS_TOP
 (
