@@ -204,7 +204,7 @@ end
 
 wire [7:0] DSW0 = {8'b0};
 wire [7:0] DSW1 = {8'b0};
-wire [7:0] JB = { /* 7 coin */ joy[7],joy[6],joy[5],joy[4],JoyX_Fw,JoyX_Bk,JoyW_Fw,JoyW_Bk};
+wire [7:0] JB = { /* 7 coin */ joy[7],joy[5],joy[6],joy[4],JoyW_Fw,JoyW_Bk,JoyX_Fw,JoyX_Bk};
 wire [15:0] sw = { DSW1,DSW0};
 //  assign buttons = {{2'b00},{JB[6]},{|JB[5:4]},{JB[3:0]}};
 //  7-> coin
