@@ -1,6 +1,0 @@
-module auxPCB
-  (
-
-   );
-
-endmodule: auxPCB

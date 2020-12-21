@@ -51,6 +51,7 @@ module emu
 	output [1:0]  VGA_SL,
 	output        VGA_SCALER, // Force VGA scaler
 
+	`ifdef USEFB
 	// Use framebuffer from DDRAM (USE_FB=1 in qsf)
 	// FB_FORMAT:
 	//    [2:0] : 011=8bpp(palette) 100=16bpp 101=24bpp 110=32bpp
@@ -76,7 +77,8 @@ module emu
 	input  [23:0] FB_PAL_DIN,
 	output        FB_PAL_WR,
 
-
+	`endif
+	
 	output        LED_USER,  // 1 - ON, 0 - OFF.
 
 	// b[1]: 0 - LED status is system status OR'd with b[0]
@@ -118,11 +120,12 @@ localparam CONF_STR = {
 	"H0OEF,Aspect ratio,Original,Full Screen,[ARC1],[ARC2];",
 	"-;",
 //	"O2,Orientation,Vert,Horz;",
-	"O34,Language,English,German,French,Spanish;",
+//	"O34,Language,English,German,French,Spanish;",
 //	"O56,Ships,2-4,3-5,4-6,5-7;", system locks up when activating above 3-5
 	"-;",
 	"R0,Reset;",
-	"J1,Up,down,fire,Start 1P,Start 2P,Coin;",	
+	"J1,fire,Start 1P,Start 2P,Coin;",
+	"jn,A,Start,Select,R;",
 	"V,v",`BUILD_DATE
 };
 
@@ -152,7 +155,6 @@ wire        ioctl_wr;
 wire [24:0] ioctl_addr;
 wire  [7:0] ioctl_dout;
 
-wire [10:0] ps2_key;
 
 wire [15:0] joy_0, joy_1;
 wire [15:0] joy = joy_0 | joy_1;
@@ -176,55 +178,33 @@ hps_io #(.STRLEN($size(CONF_STR)>>3)) hps_io
 	.ioctl_dout(ioctl_dout),
 
 	.joystick_0(joy_0),
-	.joystick_1(joy_1),
-	.ps2_key(ps2_key)
+	.joystick_1(joy_1)
+	
 );
 
-wire       pressed = ps2_key[9];
-wire [8:0] code    = ps2_key[8:0];
-always @(posedge clk_25) begin
-	reg old_state;
-	old_state <= ps2_key[10];
-	
-	if(old_state != ps2_key[10]) begin
-		casex(code)
-			'h03a: btn_fire         <= pressed; // M
-			'h005: btn_one_player   <= pressed; // F1
-			'h006: btn_two_players  <= pressed; // F2
-			'h01C: btn_left      	<= pressed; // A
-			'h023: btn_right      	<= pressed; // D
-			'h004: btn_coin  			<= pressed; // F3
-			'h04b: btn_thrust  			<= pressed; // L
-			'h042: btn_shield  			<= pressed; // K
-			'hX6B: btn_left        <= pressed; // left
-			'hX74: btn_right       <= pressed; // right
-			'h014: btn_fire        <= pressed; // ctrl
-			'h011: btn_thrust      <= pressed; // Lalt
-			'h029: btn_shield      <= pressed; // space
-			// JPAC/IPAC/MAME Style Codes
-			'h016: btn_one_player  <= pressed; // 1
-			'h01E: btn_two_players <= pressed; // 2
-			'h02E: btn_coin        <= pressed; // 5
-			'h036: btn_coin        <= pressed; // 6
-			
-		endcase
-	end
+
+/// from ultratank
+
+reg JoyW_Fw,JoyW_Bk,JoyX_Fw,JoyX_Bk;
+reg JoyY_Fw,JoyY_Bk,JoyZ_Fw,JoyZ_Bk;
+always @(posedge clk_50) begin 
+	case ({joy[3],joy[2],joy[1],joy[0]}) // Up,Down,Left,Right
+		4'b1010: begin JoyW_Fw=0; JoyW_Bk=0; JoyX_Fw=1; JoyX_Bk=0; end //Up_Left
+		4'b1000: begin JoyW_Fw=1; JoyW_Bk=0; JoyX_Fw=1; JoyX_Bk=0; end //Up
+		4'b1001: begin JoyW_Fw=1; JoyW_Bk=0; JoyX_Fw=0; JoyX_Bk=0; end //Up_Right
+		4'b0001: begin JoyW_Fw=1; JoyW_Bk=0; JoyX_Fw=0; JoyX_Bk=1; end //Right
+		4'b0101: begin JoyW_Fw=0; JoyW_Bk=1; JoyX_Fw=0; JoyX_Bk=0; end //Down_Right
+		4'b0100: begin JoyW_Fw=0; JoyW_Bk=1; JoyX_Fw=0; JoyX_Bk=1; end //Down
+		4'b0110: begin JoyW_Fw=0; JoyW_Bk=0; JoyX_Fw=0; JoyX_Bk=1; end //Down_Left
+		4'b0010: begin JoyW_Fw=0; JoyW_Bk=1; JoyX_Fw=1; JoyX_Bk=0; end //Left
+		default: begin JoyW_Fw=0; JoyW_Bk=0; JoyX_Fw=0; JoyX_Bk=0; end
+	endcase
 end
 
-reg btn_right = 0;
-reg btn_left = 0;
-reg btn_one_player = 0;
-reg btn_two_players = 0;
-reg btn_fire = 0;
-reg btn_coin = 0;
-reg btn_thrust = 0;
-reg btn_shield = 0;
-
-wire [7:0] BUTTONS = {~btn_right & ~joy[0],~btn_left & ~joy[1],~btn_one_player & ~joy[7],~btn_two_players,~btn_fire & ~joy[4],~btn_coin & ~joy[7],~btn_thrust & ~joy[5],~btn_shield & ~joy[6]};
 
 wire [7:0] DSW0 = {8'b0};
 wire [7:0] DSW1 = {8'b0};
-wire [7:0] JB = { /* 7 coin */  joy[9],joy[8],joy[7],joy[6],joy[4],joy[5],joy[2],joy[3]};
+wire [7:0] JB = { /* 7 coin */ joy[7],joy[6],joy[5],joy[4],JoyX_Fw,JoyX_Bk,JoyW_Fw,JoyW_Bk};
 wire [15:0] sw = { DSW1,DSW0};
 //  assign buttons = {{2'b00},{JB[6]},{|JB[5:4]},{JB[3:0]}};
 //  7-> coin
@@ -266,8 +246,8 @@ wire [3:0] audio;
 assign AUDIO_L = {audio, audio,8'b0};
 assign AUDIO_R = AUDIO_L;
 assign AUDIO_S = 0;
-wire [1:0] lang = status[4:3];
-wire [1:0] ships = status[6:5];
+
+
 
 top bzonetop(
 .clk_i(clk_50),
