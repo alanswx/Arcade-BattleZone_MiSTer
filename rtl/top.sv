@@ -261,6 +261,23 @@ wire prog_rom_cs = dl_addr < 'h3000;
      .wr          (weEnBram[`BRAM_PROG_RAM])
      );
 
+	  
+	wire vec_rom_cs = dl_addr >= 'h3000 && dl_addr< 'h4000 ;
+
+  dpram #(.addr_width_g(13),.data_width_g(8)) vecRam2 (
+	.clock_a(clk),
+	.address_a(dl_addr[11:0]+'d4096),
+	.data_a(dl_data),
+	.wren_a(dl_wr & vec_rom_cs),
+	
+	.clock_b(clk),
+	.enable_b(clk_3MHz_en),
+	.address_b(addrToBram[`BRAM_VECTOR][12:0]),
+	.wren_b(weEnBram[`BRAM_VECTOR]),
+	.data_b(dataToBram[`BRAM_VECTOR]),
+	.q_b(dataFromBram[`BRAM_VECTOR])
+	);
+/*	  
   (* ram_style = "block" *) logic [7:0] vecram2_store[8192];
   initial begin
     $readmemh("avg_clean2.mem", vecram2_store, 0, 8191);
@@ -271,21 +288,28 @@ wire prog_rom_cs = dl_addr < 'h3000;
       dataFromBram[`BRAM_VECTOR] <= vecram2_store[addrToBram[`BRAM_VECTOR][12:0]];
     end
   end
-
+*/
   logic [15:0] vec_ram_write_addr;
   logic [15:0] vec_ram_read_addr;
 
   assign vec_ram_write_addr = addrToBram[`BRAM_VECTOR]-16'h2000;
   assign vec_ram_read_addr  = pc - 16'h2000;
 
+  wire vecram_we;
+  assign vecram_we = vec_rom_cs ? dl_wr : weEnBram[`BRAM_VECTOR];
+  wire [12:0] vecram_addr;
+  assign vecram_addr =  vec_rom_cs ? dl_addr[11:0]+'d4096 : vec_ram_write_addr[12:0];
+  wire [7:0] vecram_data;
+  assign vecram_data =  vec_rom_cs ? dl_data : dataToBram[`BRAM_VECTOR];
+  
   (* ram_style = "block" *) logic [7:0] vecram_store[8192];
   logic [15:0] inst_pipe; // Original implementation had a pipe stage
-  initial begin
-    $readmemh("avg_clean2.mem", vecram_store, 0, 8191);
-  end
+  //initial begin
+  //  $readmemh("avg_clean2.mem", vecram_store, 0, 8191);
+  //end
   always @(posedge clk) begin
-    if (weEnBram[`BRAM_VECTOR]) begin
-      vecram_store[vec_ram_write_addr[12:0]] <= dataToBram[`BRAM_VECTOR];
+    if (vecram_we) begin
+      vecram_store[vecram_addr] <= vecram_data;
     end
     inst_pipe[7:0]  <= vecram_store[{vec_ram_read_addr[12:1], 1'b1}];
     inst_pipe[15:8] <= vecram_store[{vec_ram_read_addr[12:1], 1'b0}];
