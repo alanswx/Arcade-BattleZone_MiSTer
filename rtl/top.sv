@@ -36,7 +36,11 @@ module top
 	output logic       en_r,
 	output logic       hBlank, vBlank,
 	output logic [3:0] audio,
-   output logic       ampPWM, ampSD);
+   output logic       ampPWM, ampSD,
+	input wire [24:0]  dl_addr,
+	input wire [7:0]   dl_data,
+	input wire         dl_wr
+	);
 
 
   logic [8:0]         row;
@@ -209,6 +213,20 @@ assign clk=clk_i;
      .coin           (JB[7:7])
      );
 
+wire prog_rom_cs = dl_addr < 'h3000;
+
+  dpram #(.addr_width_g(14),.data_width_g(8)) progRom (
+	.clock_a(clk),
+	.address_a(dl_addr[13:0]),
+	.data_a(dl_data),
+	.wren_a(dl_wr & prog_rom_cs),
+	
+	.clock_b(clk),
+	.enable_b(clk_3MHz_en),
+	.address_b(prog_rom_addr[13:0]),
+	.q_b(dataFromBram[`BRAM_PROG_ROM])
+	);
+/*	
   prog_rom progRom
     (
      .addr        (prog_rom_addr[13:0]),
@@ -216,7 +234,8 @@ assign clk=clk_i;
      .clk_en      (clk_3MHz_en),
      .dout        (dataFromBram[`BRAM_PROG_ROM])
      );
-	  
+	*/
+	
   /*
   prog progRom
   (

@@ -154,6 +154,7 @@ wire        ioctl_download;
 wire        ioctl_wr;
 wire [24:0] ioctl_addr;
 wire  [7:0] ioctl_dout;
+wire  [7:0] ioctl_index;
 
 
 wire [15:0] joy_0, joy_1;
@@ -176,6 +177,7 @@ hps_io #(.STRLEN($size(CONF_STR)>>3)) hps_io
 	.ioctl_wr(ioctl_wr),
 	.ioctl_addr(ioctl_addr),
 	.ioctl_dout(ioctl_dout),
+	.ioctl_index(ioctl_index),
 
 	.joystick_0(joy_0),
 	.joystick_1(joy_1)
@@ -265,7 +267,14 @@ top bzonetop(
 .en_r(),
 .audio(audio),
 .ampPWM(),
-.ampSD());
+.ampSD(),
+
+.dl_addr(ioctl_addr),
+.dl_data(ioctl_dout),
+.dl_wr(ioctl_wr & !ioctl_index)
+
+
+);
 
 
 endmodule

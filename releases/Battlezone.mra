@@ -1,0 +1,30 @@
+<misterromdescription>
+	<name>Battlezone</name>
+	<mameversion></mameversion>
+	<mratimestamp></mratimestamp>
+	<manufacturer>Atari</manufacturer>
+	<category>Shooter</category>
+	<rbf>BattleZone</rbf>
+	<setname>bzone</setname>
+	<switches default="FF,FF,00">
+	</switches>
+        <buttons names="fire,Start 1P,Start 2P,Coin" default="A,Start,Select,R"/>
+
+	<rom index="1">
+		<part>0</part>
+	</rom>	
+	<rom index="0" zip="bzone.zip" md5="none" >
+	<!-- CPU ROMS -->
+		<part crc="13de36d5" name="036414-02.e1"/>
+		<part crc="5d9d9111" name="036413-01.h1"/>
+		<part crc="ab55cbd2" name="036412-01.j1"/>
+		<part crc="ad281297" name="036411-01.k1"/>
+		<part crc="0b7bfaa4" name="036410-01.lm1"/>
+		<part crc="1e14e919" name="036409-01.n1"/>
+	<!-- AVG PROM -->
+		<part crc="7414177b" name="036422-01.bc3"/>
+		<part crc="8ea8f939" name="036421-01.a3"/>		
+	<!-- Mathbox PROMS -->
+		<part crc="5903af03" name="036408-01.k7"/>
+	</rom>
+</misterromdescription>
