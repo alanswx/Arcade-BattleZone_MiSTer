@@ -41,7 +41,7 @@ module top
 	input wire [7:0]   dl_data,
 	input wire         dl_wr,
 	input wire mod_bradley,
-	input wire mod_redbarron
+	input wire mod_redbaron
 	);
 
 

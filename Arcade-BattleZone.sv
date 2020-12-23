@@ -205,7 +205,7 @@ end
 
 localparam mod_battlezone  = 0;
 localparam mod_bradley     = 1;
-localparam mod_redbarron   = 2;
+localparam mod_redbaron   = 2;
 
 
 reg [7:0] mod = 255;
@@ -286,7 +286,7 @@ top bzonetop(
 .dl_wr(ioctl_wr & !ioctl_index),
 
 .mod_bradley(mod==mod_bradley),
-.mod_redbarron(mod==mod_redbarron)
+.mod_redbaron(mod==mod_redbaron)
 
 
 
