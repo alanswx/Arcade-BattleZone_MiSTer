@@ -28,8 +28,10 @@ module top
    )
   (
    input wire         clk_i, btnCpuReset,
-   input wire [15:0]  sw,
+   input wire [7:0]   DSW0,
+   input wire [7:0]   DSW1,
    input wire [7:0]   JB,
+	input wire         self_test,
    output logic [7:0] JD,
    output logic [3:0] vgaRed, vgaBlue, vgaGreen,
    output logic       Hsync, Vsync,
@@ -94,9 +96,7 @@ module top
   assign prog_rom_addr = addrToBram[`BRAM_PROG_ROM]-16'h4000;
 
   logic              avg_halt;
-  logic              self_test;
 
-  assign self_test = 1'b1;
 
   logic              locked;
 
@@ -212,7 +212,8 @@ assign clk=clk_i;
      .clk_3KHz       (clk_3KHz),
      .clk_en         (clk_3MHz_en),
      .self_test      (self_test),
-     .option_switch  (sw),
+     .DSW0           (DSW0),
+     .DSW1           (DSW1),
      .coin           (JB[7:7]),
 	  .mod_redbaron   (mod_redbaron)
      );

@@ -6,7 +6,10 @@
 	<category>Shooter</category>
 	<rbf>BattleZone</rbf>
 	<setname>redbarona</setname>
-	<switches default="FF,FF,00">
+	<switches default="FD,FF,00">
+		<dip bits="16,17"   name="Language" ids="German,French,Spanish,English"/>
+		<dip bits="18,19"   name="Bonus" ids="2k 10k 30k,4k 15k 40k,6k 20k 50k, None" />
+		<dip bits="20,21"   name="Lives" ids="5,4,3,2"/>
 	</switches>
         <buttons names="fire,Start 1P,Start 2P,Coin" default="A,Start,Select,R"/>
 

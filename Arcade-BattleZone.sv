@@ -122,6 +122,9 @@ localparam CONF_STR = {
 //	"O2,Orientation,Vert,Horz;",
 //	"O34,Language,English,German,French,Spanish;",
 //	"O56,Ships,2-4,3-5,4-6,5-7;", system locks up when activating above 3-5
+	"DIP;",
+	"-;",
+	"03,Self Test,Off,On;",
 	"-;",
 	"R0,Reset;",
 	"J1,fire,Start 1P,Start 2P,Coin;",
@@ -266,9 +269,11 @@ assign AUDIO_S = 0;
 top bzonetop(
 .clk_i(clk_50),
 .btnCpuReset(~reset),
-.sw(switches),
+.DSW0(DSW0),
+.DSW1(DSW1),
 .JB(JB),
 .JD(),
+.self_test(~status[3]),
 .vgaRed(r),
 .vgaGreen(g),
 .vgaBlue(b),

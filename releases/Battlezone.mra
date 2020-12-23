@@ -6,7 +6,13 @@
 	<category>Shooter</category>
 	<rbf>BattleZone</rbf>
 	<setname>bzone</setname>
-	<switches default="FF,FF,00">
+	<switches default="FD,FD,00">
+		<dip bits="0,1"   name="Lives" ids="2,3,4,5"/>
+		<dip bits="2,3"   name="Missile aprs at" ids="5k,10k,20k,30k"/>
+		<dip bits="4,5"  name="Bonus" ids="None,15k and 100k,25k and 100k, 50k and 100k" />
+		<dip bits="6,7"   name="Language" ids="English,German,French,Spanish"/>
+		<dip bits="8,9"   name="Coinage" ids="Free Play,1C_2C,1C_1C,2C_1C"/>
+
 	</switches>
         <buttons names="fire,Start 1P,Start 2P,Coin" default="A,Start,Select,R"/>
 

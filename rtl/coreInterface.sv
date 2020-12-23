@@ -88,7 +88,8 @@ module addrDecoder
    input wire               clk_3KHz,
    input wire               clk_en,
    input wire               self_test,
-   input wire [15:0]        option_switch,
+   input wire [7:0]         DSW0,
+   input wire [7:0]         DSW1,
    input wire               coin,
 	input wire               mod_redbaron
 	);
@@ -169,8 +170,8 @@ module addrDecoder
         else begin
             case(outBramAddr)
                 16'h800: dataToCore = {clk_3KHz, halt, 1'b1, self_test, 3'b111, coin};
-                16'ha00: dataToCore = option_switch[7:0];//dataToCore = 8'b0001_0101;
-                16'hc00: dataToCore = option_switch[15:8];
+                16'ha00: dataToCore = DSW0;//dataToCore = 8'b0001_0101;
+                16'hc00: dataToCore = DSW1;
                 //16'h1800: dataToCore = 8'b11111111;
                 default: begin
                     if(outBramAddr != 16'h1400) unmappedAccess = 1;
