@@ -88,7 +88,7 @@ module top
   logic              coreReset;
 
   logic [15:0]       prog_rom_addr;
-  assign prog_rom_addr = addrToBram[`BRAM_PROG_ROM]-16'h5000;
+  assign prog_rom_addr = addrToBram[`BRAM_PROG_ROM]-16'h4000;
 
   logic              avg_halt;
   logic              self_test;
@@ -213,7 +213,7 @@ assign clk=clk_i;
      .coin           (JB[7:7])
      );
 
-wire prog_rom_cs = dl_addr < 'h3000;
+wire prog_rom_cs = dl_addr < 'h4000;
 
   dpram #(.addr_width_g(14),.data_width_g(8)) progRom (
 	.clock_a(clk),
@@ -262,7 +262,7 @@ wire prog_rom_cs = dl_addr < 'h3000;
      );
 
 	  
-	wire vec_rom_cs = dl_addr >= 'h3000 && dl_addr< 'h4000 ;
+	wire vec_rom_cs = dl_addr >= 'h4000 && dl_addr< 'h5000 ;
 
   dpram #(.addr_width_g(13),.data_width_g(8)) vecRam2 (
 	.clock_a(clk),

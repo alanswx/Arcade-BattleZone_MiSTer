@@ -15,6 +15,8 @@
 	</rom>	
 	<rom index="0" zip="bzone.zip" md5="none" >
 	<!-- CPU ROMS -->
+	    <part repeat="2048">0</part>
+	    <part repeat="2048">0</part>
 		<part crc="13de36d5" name="036414-02.e1"/>
 		<part crc="5d9d9111" name="036413-01.h1"/>
 		<part crc="ab55cbd2" name="036412-01.j1"/>
