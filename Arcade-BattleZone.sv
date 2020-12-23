@@ -203,11 +203,23 @@ always @(posedge clk_50) begin
 	endcase
 end
 
+localparam mod_battlezone  = 0;
+localparam mod_bradley     = 1;
+localparam mod_redbarron   = 2;
+
+
+reg [7:0] mod = 255;
+always @(posedge clk_25) if (ioctl_wr & (ioctl_index==1)) mod <= ioctl_dout;
+
+
+reg [7:0] sw[8];
+always @(posedge clk_25) if (ioctl_wr && (ioctl_index==254) && !ioctl_addr[24:3]) sw[ioctl_addr[2:0]] <= ioctl_dout;
+
 
 wire [7:0] DSW0 = {8'b0};
 wire [7:0] DSW1 = {8'b0};
 wire [7:0] JB = { /* 7 coin */ joy[7],joy[5],joy[6],joy[4],JoyW_Fw,JoyW_Bk,JoyX_Fw,JoyX_Bk};
-wire [15:0] sw = { DSW1,DSW0};
+wire [15:0] switches = { DSW1,DSW0};
 //  assign buttons = {{2'b00},{JB[6]},{|JB[5:4]},{JB[3:0]}};
 //  7-> coin
 
@@ -254,7 +266,7 @@ assign AUDIO_S = 0;
 top bzonetop(
 .clk_i(clk_50),
 .btnCpuReset(~reset),
-.sw(sw),
+.sw(switches),
 .JB(JB),
 .JD(),
 .vgaRed(r),
@@ -271,7 +283,11 @@ top bzonetop(
 
 .dl_addr(ioctl_addr),
 .dl_data(ioctl_dout),
-.dl_wr(ioctl_wr & !ioctl_index)
+.dl_wr(ioctl_wr & !ioctl_index),
+
+.mod_bradley(mod==mod_bradley),
+.mod_redbarron(mod==mod_redbarron)
+
 
 
 );

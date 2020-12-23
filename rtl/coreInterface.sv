@@ -108,7 +108,7 @@ module addrDecoder
 
     always_comb begin
         sound_access = 1'b0;
-        if(addr >= 16'h0 && addr < 16'h0400) bramNum = `BRAM_PROG_RAM;
+        if(addr >= 16'h0 && addr < 16'h0800) bramNum = `BRAM_PROG_RAM;
         else if(16'h2000 <= addr && addr < 16'h4000) bramNum = `BRAM_VECTOR;
         else if(16'h5000 <= addr && addr < 16'h8000) bramNum = `BRAM_PROG_ROM;
         else if(16'h1820 <= addr && addr < 16'h1830) bramNum = `BRAM_POKEY;
@@ -126,7 +126,7 @@ module addrDecoder
         mathboxAccess = bramNum == `BRAM_MATH;
         addrToBram[0] = 'd0;
         addrToBram[1] = 'd0;
-        addrToBram[2] = 'h5000;
+        addrToBram[2] = 'h4000;
         addrToBram[3] = 'd0;
         addrToBram[4] = 'd0;
         dataToBram[0] = 'd0;

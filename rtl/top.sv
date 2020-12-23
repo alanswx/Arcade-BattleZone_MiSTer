@@ -39,7 +39,9 @@ module top
    output logic       ampPWM, ampSD,
 	input wire [24:0]  dl_addr,
 	input wire [7:0]   dl_data,
-	input wire         dl_wr
+	input wire         dl_wr,
+	input wire mod_bradley,
+	input wire mod_redbarron
 	);
 
 
@@ -249,13 +251,13 @@ wire prog_rom_cs = dl_addr < 'h4000;
     #
     (
      .DATA        (8),
-     .ADDR        (10)
+     .ADDR        (11)
      )
   progRam
     (
      .clk         (clk),
      .clk_en      (clk_3MHz_en),
-     .addr        (addrToBram[`BRAM_PROG_RAM][9:0]),
+     .addr        (addrToBram[`BRAM_PROG_RAM][10:0]),
      .din         (dataToBram[`BRAM_PROG_RAM]),
      .dout        (dataFromBram[`BRAM_PROG_RAM]),
      .wr          (weEnBram[`BRAM_PROG_RAM])
