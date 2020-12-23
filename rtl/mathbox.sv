@@ -6,6 +6,7 @@ module mathBox
    input wire         clk,
    input wire         clk_en,
    input wire         rst,
+	input wire         mod_redbaron,
    output logic [7:0] dataOut
    );
 
@@ -53,11 +54,19 @@ module mathBox
     end
     always_ff @(posedge clk) begin
       if (clk_en) begin
-        if(addr == 8'h00) dataOut <= status;
-        else if(addr == 8'h10) dataOut <= mbOutQ[7:0];
-        else if(addr == 8'h18) dataOut <= mbOutQ[15:8];
-        else dataOut <= 8'hFF;
-      end
+		  if (mod_redbaron) begin
+			  if(addr == 8'h00) dataOut <= status;
+			  else if(addr == 8'h04) dataOut <= mbOutQ[7:0];
+			  else if(addr == 8'h06) dataOut <= mbOutQ[15:8];
+			  else dataOut <= 8'hFF;
+		  end
+		  else begin
+			  if(addr == 8'h00) dataOut <= status;
+			  else if(addr == 8'h10) dataOut <= mbOutQ[7:0];
+			  else if(addr == 8'h18) dataOut <= mbOutQ[15:8];
+			  else dataOut <= 8'hFF;
+		  end
+		end
     end
 
     logic [7:0] dataIn;

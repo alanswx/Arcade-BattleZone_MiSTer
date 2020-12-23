@@ -89,7 +89,9 @@ module addrDecoder
    input wire               clk_en,
    input wire               self_test,
    input wire [15:0]        option_switch,
-   input wire               coin);
+   input wire               coin,
+	input wire               mod_redbaron
+	);
 
     logic [2:0] bramNum, outBramNum;
 
@@ -108,17 +110,36 @@ module addrDecoder
 
     always_comb begin
         sound_access = 1'b0;
-        if(addr >= 16'h0 && addr < 16'h0800) bramNum = `BRAM_PROG_RAM;
-        else if(16'h2000 <= addr && addr < 16'h4000) bramNum = `BRAM_VECTOR;
-        else if(16'h5000 <= addr && addr < 16'h8000) bramNum = `BRAM_PROG_ROM;
-        else if(16'h1820 <= addr && addr < 16'h1830) bramNum = `BRAM_POKEY;
-        else if(16'h1840 == addr) begin
-            bramNum = `BRAM_POKEY;
-            sound_access = 1'b1;
-        end
-        else if(addr == 16'h1800 || addr == 16'h1810 || addr == 16'h1818 || (16'h1860 <= addr && addr <= 16'h187f)) bramNum = `BRAM_MATH;
-        else bramNum = 5; //error code
-    end
+		  
+        if (mod_redbaron) begin
+			  if(addr >= 16'h0 && addr < 16'h0800) bramNum = `BRAM_PROG_RAM;
+			  else if(16'h2000 <= addr && addr < 16'h4000) bramNum = `BRAM_VECTOR;
+			  else if(16'h4000 <= addr && addr < 16'h8000) bramNum = `BRAM_PROG_ROM;
+			  else if(16'h1810 <= addr && addr < 16'h1820) bramNum = `BRAM_POKEY;
+			  else if(16'h1840 == addr) begin
+					bramNum = `BRAM_POKEY;
+					sound_access = 1'b1;
+			  end
+			  else if(addr == 16'h1800 || addr == 16'h1804 || addr == 16'h1806 || (16'h1860 <= addr && addr <= 16'h187f)) bramNum = `BRAM_MATH;
+			  else bramNum = 5; //error code
+			  end
+
+			else begin
+			  if(addr >= 16'h0 && addr < 16'h0800) bramNum = `BRAM_PROG_RAM;
+			  else if(16'h2000 <= addr && addr < 16'h4000) bramNum = `BRAM_VECTOR;
+			  else if(16'h4000 <= addr && addr < 16'h8000) bramNum = `BRAM_PROG_ROM;
+			  else if(16'h1820 <= addr && addr < 16'h1830) bramNum = `BRAM_POKEY;
+			  else if(16'h1840 == addr) begin
+					bramNum = `BRAM_POKEY;
+					sound_access = 1'b1;
+			  end
+			  else if(addr == 16'h1800 || addr == 16'h1810 || addr == 16'h1818 || (16'h1860 <= addr && addr <= 16'h187f)) bramNum = `BRAM_MATH;
+			  else bramNum = 5; //error code
+			end
+			
+		end
+
+		  
 
     logic unmappedAccess, vramWrite, unmappedRead, mathboxAccess;
 

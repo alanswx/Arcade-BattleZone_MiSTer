@@ -216,8 +216,8 @@ reg [7:0] sw[8];
 always @(posedge clk_25) if (ioctl_wr && (ioctl_index==254) && !ioctl_addr[24:3]) sw[ioctl_addr[2:0]] <= ioctl_dout;
 
 
-wire [7:0] DSW0 = {8'b0};
-wire [7:0] DSW1 = {8'b0};
+wire [7:0] DSW0 = sw[0];
+wire [7:0] DSW1 = sw[1];
 wire [7:0] JB = { /* 7 coin */ joy[7],joy[5],joy[6],joy[4],JoyW_Fw,JoyW_Bk,JoyX_Fw,JoyX_Bk};
 wire [15:0] switches = { DSW1,DSW0};
 //  assign buttons = {{2'b00},{JB[6]},{|JB[5:4]},{JB[3:0]}};
@@ -286,7 +286,8 @@ top bzonetop(
 .dl_wr(ioctl_wr & !ioctl_index),
 
 .mod_bradley(mod==mod_bradley),
-.mod_redbaron(mod==mod_redbaron)
+.mod_redbaron(mod==mod_redbaron),
+.mod_battlezone(mod==mod_battlezone)
 
 
 

@@ -30,6 +30,7 @@ module fb_controller
    input wire [8:0]   row,
    input wire [9:0]   col,
    input wire [3:0]   color_in,
+	input wire         mod_battlezone,
    output logic [3:0] red_out,
    output logic [3:0] blue_out,
    output logic [3:0] green_out,
@@ -107,16 +108,23 @@ module fb_controller
 
     //switch between brams
     always_comb begin
-        if(row >= 0 && row <= 120) begin
-            red_out = color_out;
-            green_out = 4'b0000;
-            blue_out = 4'b0000;
-        end
-        else begin
-            red_out = 4'b0000;
-            green_out = color_out;
-            blue_out = 4'b0000;
-        end
+	    if (mod_battlezone) begin	 
+			  if(row >= 0 && row <= 120) begin
+					red_out = color_out;
+					green_out = 4'b0000;
+					blue_out = 4'b0000;
+			  end
+			  else begin
+					red_out = 4'b0000;
+					green_out = color_out;
+					blue_out = 4'b0000;
+			  end
+		 end
+		 else begin
+					red_out = color_out;
+					green_out = color_out;
+					blue_out = color_out;
+		 end
     //clear to b read from a, write to b read from a, clear to a read from b, write to a read from b
         case(state)
             READ_A: begin //clear to b read from a

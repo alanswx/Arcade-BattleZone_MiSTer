@@ -41,7 +41,8 @@ module top
 	input wire [7:0]   dl_data,
 	input wire         dl_wr,
 	input wire mod_bradley,
-	input wire mod_redbaron
+	input wire mod_redbaron,
+	input wire mod_battlezone
 	);
 
 
@@ -212,7 +213,8 @@ assign clk=clk_i;
      .clk_en         (clk_3MHz_en),
      .self_test      (self_test),
      .option_switch  (sw),
-     .coin           (JB[7:7])
+     .coin           (JB[7:7]),
+	  .mod_redbaron   (mod_redbaron)
      );
 
 wire prog_rom_cs = dl_addr < 'h4000;
@@ -424,6 +426,7 @@ wire prog_rom_cs = dl_addr < 'h4000;
      .row            (row),
      .col            (col),
      .color_in       (color_in_pipe),
+	  .mod_battlezone (mod_battlezone),
      .red_out        (vgaRed),
      .blue_out       (vgaBlue),
      .green_out      (vgaGreen),
@@ -438,6 +441,7 @@ wire prog_rom_cs = dl_addr < 'h4000;
      .clk            (clk),
      .clk_en         (clk_3MHz_en),
      .rst            (rst),
+	  .mod_redbaron   (mod_redbaron),
      .dataOut        (dataFromBram[`BRAM_MATH])
      );
 
@@ -460,8 +464,14 @@ wire prog_rom_cs = dl_addr < 'h4000;
   //sound
   assign buttons = {{2'b00},{JB[6]},{|JB[5:4]},{JB[3:0]}};
   logic      pokeyEn;
-  assign pokeyEn = ~(addrToBram[`BRAM_POKEY] >= 16'h1820 && addrToBram[`BRAM_POKEY] < 16'h1830);
-
+  logic      pokeyEnRB;
+  logic      pokeyEnBZ;
+  
+  // Red Baron has the pokey in a different position
+  assign pokeyEnBZ = ~(addrToBram[`BRAM_POKEY] >= 16'h1820 && addrToBram[`BRAM_POKEY] < 16'h1830);
+  assign pokeyEnRB = ~(addrToBram[`BRAM_POKEY] >= 16'h1810 && addrToBram[`BRAM_POKEY] < 16'h1820);
+  assign pokeyEn = mod_redbaron ? pokeyEnRB : pokeyEnBZ;
+  
   //output latch for POKEY
   always_ff @(posedge clk) begin
     if (clk_3MHz_en) begin
