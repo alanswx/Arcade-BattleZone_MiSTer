@@ -250,13 +250,8 @@ always @(*) begin
 			    // Fire, Start, Analog ?
 				JB <= { /* 7 coin */ joy[7],joy[5],joy[6],joy[4],joy[2],joy[3],joy[0],joy[1]};
 				//arcadebuttons<={4'b0,joy[3],joy[0],joy[1]};
-				REDBARONBUTTONS<={joy[4],joy[5],6'b0};					
-				if (audiosel[0])
-					//arcadebuttons <=(8'd127 - joya[7:0]);
-					arcadebuttons <=8'd255 - (8'd127 - joya[7:0]);
-				else
-					//arcadebuttons <=(8'd127 - joya[15:8]);
-					arcadebuttons <=8'd255 -  (8'd127 - joya[15:8]);
+				REDBARONBUTTONS<={joy[4],joy[5],6'b0};		
+				arcadebuttons <= audiosel[0] ? (8'd127 - joya[7:0]) : 8'd127 - joya[15:8];
 			end
 			default:
 			begin
