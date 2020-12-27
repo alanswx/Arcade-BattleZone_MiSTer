@@ -524,6 +524,7 @@ wire prog_rom_cs = dl_addr < 'h4000;
   
   always_ff @(posedge clk)
   begin
+    if (clk_3MHz)
 	   audiosel<=dataFromBram[`BRAM_POKEY];
   end
   
