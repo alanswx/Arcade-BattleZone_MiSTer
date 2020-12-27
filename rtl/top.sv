@@ -30,8 +30,12 @@ module top
    input wire         clk_i, btnCpuReset,
    input wire [7:0]   DSW0,
    input wire [7:0]   DSW1,
+	input wire [7:0]   REDBARONBUTTONS,
+	input wire [7:0]   REDBARONJOY,
    input wire [7:0]   JB,
+	input wire [7:0]   buttons,
 	input wire         self_test,
+	output logic [7:0] audiosel,
    output logic [7:0] JD,
    output logic [3:0] vgaRed, vgaBlue, vgaGreen,
    output logic       Hsync, Vsync,
@@ -214,6 +218,9 @@ assign clk=clk_i;
      .self_test      (self_test),
      .DSW0           (DSW0),
      .DSW1           (DSW1),
+	  .REDBARONBUTTONS(REDBARONBUTTONS),
+	  .REDBARONJOY(REDBARONJOY),
+
      .coin           (JB[7:7]),
 	  .mod_redbaron   (mod_redbaron)
      );
@@ -460,10 +467,9 @@ wire prog_rom_cs = dl_addr < 'h4000;
     end
   end
 
-  logic[7:0] outputLatch, buttons;
+  logic[7:0] outputLatch;
 
   //sound
-  assign buttons = {{2'b00},{JB[6]},{|JB[5:4]},{JB[3:0]}};
   logic      pokeyEn;
   logic      pokeyEnRB;
   logic      pokeyEnBZ;
@@ -514,6 +520,13 @@ wire prog_rom_cs = dl_addr < 'h4000;
   assign lfsrOut0 = extAud[15];
   assign lfsrOut1 = !(&extAud[14:11]);
 
+  
+  
+  always_ff @(posedge clk)
+  begin
+	   audiosel<=dataFromBram[`BRAM_POKEY];
+  end
+  
   always_ff @(posedge clk)
     if (clk_6KHz_en) begin
       if (rst | !ampSD) begin

@@ -124,7 +124,7 @@ localparam CONF_STR = {
 //	"O56,Ships,2-4,3-5,4-6,5-7;", system locks up when activating above 3-5
 	"DIP;",
 	"-;",
-	"03,Self Test,Off,On;",
+	"O3,Self Test,Off,On;",
 	"-;",
 	"R0,Reset;",
 	"J1,fire,Start 1P,Start 2P,Coin;",
@@ -162,6 +162,8 @@ wire  [7:0] ioctl_index;
 
 wire [15:0] joy_0, joy_1;
 wire [15:0] joy = joy_0 | joy_1;
+wire [15:0] joya;
+
 wire        forced_scandoubler;
 wire [21:0] gamma_bus;
 
@@ -183,7 +185,8 @@ hps_io #(.STRLEN($size(CONF_STR)>>3)) hps_io
 	.ioctl_index(ioctl_index),
 
 	.joystick_0(joy_0),
-	.joystick_1(joy_1)
+	.joystick_1(joy_1),
+   .joystick_analog_0(joya)
 	
 );
 
@@ -219,10 +222,52 @@ reg [7:0] sw[8];
 always @(posedge clk_25) if (ioctl_wr && (ioctl_index==254) && !ioctl_addr[24:3]) sw[ioctl_addr[2:0]] <= ioctl_dout;
 
 
+wire [7:0] JB;
+wire [7:0] arcadebuttons;
+wire [7:0] audiosel;
+wire [7:0] REDBARONBUTTONS;
+wire [7:0] REDBARONJOY;
+always @(*) begin
+			JB<=8'b0;
+			arcadebuttons <= 8'b0;
+			REDBARONBUTTONS<=8'b0;
+        case (mod) 
+		  
+			mod_battlezone:
+			begin
+			   // Pokey P (arcade buttons) : NC,NC, Start, Fire, L-For, L-Rev, R-For, R-Rev
+				JB <= { /* 7 coin */ joy[7],joy[5],joy[6],joy[4],JoyW_Fw,JoyW_Bk,JoyX_Fw,JoyX_Bk};
+				arcadebuttons <= {{2'b00},{joy[5]},{|{joy[6],joy[4]}},JoyW_Fw,JoyW_Bk,JoyX_Fw,JoyX_Bk};
+
+			end
+			mod_bradley:
+			begin
+				JB <= { /* 7 coin */ joy[7],joy[5],joy[6],joy[4],JoyW_Fw,JoyW_Bk,JoyX_Fw,JoyX_Bk};
+				arcadebuttons <= {{2'b00},{joy[5]},{|{joy[6],joy[4]}},JoyW_Fw,JoyW_Bk,JoyX_Fw,JoyX_Bk};
+			end
+			mod_redbaron:
+			begin 
+			    // Fire, Start, Analog ?
+				JB <= { /* 7 coin */ joy[7],joy[5],joy[6],joy[4],joy[2],joy[3],joy[0],joy[1]};
+				//arcadebuttons<={4'b0,joy[3],joy[0],joy[1]};
+				REDBARONBUTTONS<={joy[4],joy[5],6'b0};					
+				if (audiosel[0])
+					//arcadebuttons <=(8'd127 - joya[7:0]);
+					arcadebuttons <=8'd255 - (8'd127 - joya[7:0]);
+				else
+					//arcadebuttons <=(8'd127 - joya[15:8]);
+					arcadebuttons <=8'd255 -  (8'd127 - joya[15:8]);
+			end
+			default:
+			begin
+				JB <= { /* 7 coin */ joy[7],joy[5],joy[6],joy[4],JoyW_Fw,JoyW_Bk,JoyX_Fw,JoyX_Bk};
+				arcadebuttons <= {{2'b00},{joy[5]},{|{joy[6],joy[4]}},JoyW_Fw,JoyW_Bk,JoyX_Fw,JoyX_Bk};
+			end
+		 endcase
+end			
+
 wire [7:0] DSW0 = sw[0];
 wire [7:0] DSW1 = sw[1];
-wire [7:0] JB = { /* 7 coin */ joy[7],joy[5],joy[6],joy[4],JoyW_Fw,JoyW_Bk,JoyX_Fw,JoyX_Bk};
-wire [15:0] switches = { DSW1,DSW0};
 //  assign buttons = {{2'b00},{JB[6]},{|JB[5:4]},{JB[3:0]}};
 //  7-> coin
 
@@ -272,7 +317,11 @@ top bzonetop(
 .DSW0(DSW0),
 .DSW1(DSW1),
 .JB(JB),
+.buttons(arcadebuttons),
+.REDBARONBUTTONS(REDBARONBUTTONS),
+.REDBARONJOY(REDBARONJOY),
 .JD(),
+.audiosel(audiosel),
 .self_test(~status[3]),
 .vgaRed(r),
 .vgaGreen(g),
@@ -285,7 +334,6 @@ top bzonetop(
 .audio(audio),
 .ampPWM(),
 .ampSD(),
-
 .dl_addr(ioctl_addr),
 .dl_data(ioctl_dout),
 .dl_wr(ioctl_wr & !ioctl_index),
