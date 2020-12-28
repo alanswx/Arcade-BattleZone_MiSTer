@@ -119,7 +119,7 @@ module addrDecoder
 			  else if(16'h2000 <= addr && addr < 16'h4000) bramNum = `BRAM_VECTOR;
 			  else if(16'h4000 <= addr && addr < 16'h8000) bramNum = `BRAM_PROG_ROM;
 			  else if(16'h1810 <= addr && addr < 16'h1820) bramNum = `BRAM_POKEY;
-			  else if(16'h1840 == addr) begin
+			  else if(16'h1808 == addr) begin
 					bramNum = `BRAM_POKEY;
 					sound_access = 1'b1;
 			  end
