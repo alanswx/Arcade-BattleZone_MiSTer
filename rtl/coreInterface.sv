@@ -91,7 +91,6 @@ module addrDecoder
    input wire [7:0]         DSW0,
    input wire [7:0]         DSW1,
 	input wire [7:0]         REDBARONBUTTONS,
-	input wire [7:0]         REDBARONJOY,
    input wire               coin,
 	input wire               mod_redbaron
 	);
@@ -171,9 +170,8 @@ module addrDecoder
         end
         else begin
             case(outBramAddr)
-                16'h800: dataToCore = {clk_3KHz, halt, 1'b1, self_test, 3'b111, coin};
+                16'h800: dataToCore = {clk_3KHz, halt, 1'b1, self_test, 2'b11,1'b1, coin};
                 16'h1802: dataToCore = REDBARONBUTTONS;
-					 16'h1808: dataToCore = REDBARONJOY;
                 16'ha00: dataToCore = DSW0;//dataToCore = 8'b0001_0101;
                 16'hc00: dataToCore = DSW1;
                 //16'h1800: dataToCore = 8'b11111111;

@@ -31,7 +31,6 @@ module top
    input wire [7:0]   DSW0,
    input wire [7:0]   DSW1,
 	input wire [7:0]   REDBARONBUTTONS,
-	input wire [7:0]   REDBARONJOY,
    input wire [7:0]   JB,
 	input wire [7:0]   buttons,
 	input wire         self_test,
@@ -219,7 +218,6 @@ assign clk=clk_i;
      .DSW0           (DSW0),
      .DSW1           (DSW1),
 	  .REDBARONBUTTONS(REDBARONBUTTONS),
-	  .REDBARONJOY(REDBARONJOY),
 
      .coin           (JB[7:7]),
 	  .mod_redbaron   (mod_redbaron)
@@ -539,7 +537,7 @@ wire prog_rom_cs = dl_addr < 'h4000;
   assign lfsrOut0 = extAud[15];
   assign lfsrOut1 = !(&extAud[14:11]);
 
-  assign audiosel = outputLatch_redbaron;
+  assign audiosel = mod_redbaron ? outputLatch_redbaron : outputLatch;
  /* 
   always_ff @(posedge clk)
   begin

@@ -248,10 +248,10 @@ always @(*) begin
 			mod_redbaron:
 			begin 
 			    // Fire, Start, Analog ?
-				JB <= { /* 7 coin */ joy[7],joy[5],joy[6],joy[4],joy[2],joy[3],joy[0],joy[1]};
+				JB <= { /* 7 coin */ ~joy[7],joy[5],joy[6],joy[4],joy[2],joy[3],joy[0],joy[1]};
 				//arcadebuttons<={4'b0,joy[3],joy[0],joy[1]};
 				REDBARONBUTTONS<={joy[4],joy[5],6'b0};		
-				arcadebuttons <= audiosel[0] ? (8'd127 - joya[7:0]) : (8'd127 - joya[15:8]);
+				arcadebuttons <= audiosel[0] ? (8'd255-(8'd127 - joya[7:0])) : (8'd255-(8'd127 - joya[15:8]));
 			end
 			default:
 			begin
@@ -314,7 +314,6 @@ top bzonetop(
 .JB(JB),
 .buttons(arcadebuttons),
 .REDBARONBUTTONS(REDBARONBUTTONS),
-.REDBARONJOY(REDBARONJOY),
 .JD(),
 .audiosel(audiosel),
 .self_test(~status[3]),
