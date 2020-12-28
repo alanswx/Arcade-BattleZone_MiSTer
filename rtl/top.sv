@@ -478,7 +478,7 @@ wire prog_rom_cs = dl_addr < 'h4000;
   assign pokeyEnBZ = ~(addrToBram[`BRAM_POKEY] >= 16'h1820 && addrToBram[`BRAM_POKEY] < 16'h1830);
   assign pokeyEnRB = ~(addrToBram[`BRAM_POKEY] >= 16'h1810 && addrToBram[`BRAM_POKEY] < 16'h1820);
   assign pokeyEn = mod_redbaron ? pokeyEnRB : pokeyEnBZ;
-  
+
   //output latch for POKEY
   always_ff @(posedge clk) begin
     if (clk_3MHz_en) begin
@@ -492,7 +492,26 @@ wire prog_rom_cs = dl_addr < 'h4000;
         outputLatch <= outputLatch;
       end
     end // if (clk_3MHz_en)
+  end  
+
+  logic[7:0] outputLatch_redbaron;
+
+  //output latch for POKEY
+  always_ff @(posedge clk) begin
+    if (clk_3MHz_en) begin
+      if(rst) begin
+        outputLatch_redbaron <= 'd0;
+      end
+      if(addrToBram[`BRAM_POKEY] == 16'h1808 && weEnBram[`BRAM_POKEY]) begin
+        outputLatch_redbaron <= dataToBram[`BRAM_POKEY];
+      end
+      else begin
+        outputLatch_redbaron <= outputLatch_redbaron;
+      end
+    end // if (clk_3MHz_en)
   end
+  
+  
   assign ampSD = outputLatch[5];
 
   POKEY pokey
@@ -520,14 +539,14 @@ wire prog_rom_cs = dl_addr < 'h4000;
   assign lfsrOut0 = extAud[15];
   assign lfsrOut1 = !(&extAud[14:11]);
 
-  
-  
+  assign audiosel = outputLatch_redbaron;
+ /* 
   always_ff @(posedge clk)
   begin
     if (clk_3MHz)
 	   audiosel<=dataFromBram[`BRAM_POKEY];
   end
-  
+  */
   always_ff @(posedge clk)
     if (clk_6KHz_en) begin
       if (rst | !ampSD) begin
