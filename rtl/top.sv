@@ -34,14 +34,12 @@ module top
    input wire [7:0]   JB,
 	input wire [7:0]   buttons,
 	input wire         self_test,
-	output logic [7:0] audiosel,
-   output logic [7:0] JD,
+	output logic audiosel,
    output logic [3:0] vgaRed, vgaBlue, vgaGreen,
    output logic       Hsync, Vsync,
 	output logic       en_r,
 	output logic       hBlank, vBlank,
 	output logic [3:0] audio,
-   output logic       ampPWM, ampSD,
 	input wire [24:0]  dl_addr,
 	input wire [7:0]   dl_data,
 	input wire         dl_wr,
@@ -68,6 +66,7 @@ module top
   logic [12:0]        pixelX, pixelY;
   logic               rst_l;
   logic               vggo, vgrst;
+  logic               ampPWM, ampSD;
 
   assign rst = ~rst_l;
   assign readyLine = ~empty;
@@ -465,126 +464,19 @@ wire prog_rom_cs = dl_addr < 'h4000;
     end
   end
 
-  logic[7:0] outputLatch;
-
-  //sound
-  logic      pokeyEn;
-  logic      pokeyEnRB;
-  logic      pokeyEnBZ;
-  
-  // Red Baron has the pokey in a different position
-  assign pokeyEnBZ = ~(addrToBram[`BRAM_POKEY] >= 16'h1820 && addrToBram[`BRAM_POKEY] < 16'h1830);
-  assign pokeyEnRB = ~(addrToBram[`BRAM_POKEY] >= 16'h1810 && addrToBram[`BRAM_POKEY] < 16'h1820);
-  assign pokeyEn = mod_redbaron ? pokeyEnRB : pokeyEnBZ;
-
-  //output latch for POKEY
-  always_ff @(posedge clk) begin
-    if (clk_3MHz_en) begin
-      if(rst) begin
-        outputLatch <= 'd0;
-      end
-      if(addrToBram[`BRAM_POKEY] == 16'h1840 && weEnBram[`BRAM_POKEY]) begin
-        outputLatch <= dataToBram[`BRAM_POKEY];
-      end
-      else begin
-        outputLatch <= outputLatch;
-      end
-    end // if (clk_3MHz_en)
-  end  
-
-  logic[7:0] outputLatch_redbaron;
-
-  //output latch for POKEY
-  always_ff @(posedge clk) begin
-    if (clk_3MHz_en) begin
-      if(rst) begin
-        outputLatch_redbaron <= 'd0;
-      end
-      if(addrToBram[`BRAM_POKEY] == 16'h1808 && weEnBram[`BRAM_POKEY]) begin
-        outputLatch_redbaron <= dataToBram[`BRAM_POKEY];
-      end
-      else begin
-        outputLatch_redbaron <= outputLatch_redbaron;
-      end
-    end // if (clk_3MHz_en)
-  end
-  
-  
-  assign ampSD = outputLatch[5];
-
-  POKEY pokey
-    (
-     .Din              (dataToBram[`BRAM_POKEY] ),
-     .Dout             (dataFromBram[`BRAM_POKEY]),
-     .A                (addrToBram[`BRAM_POKEY][3:0]),
-     .P                (buttons),
-     .phi2             (clk_3MHz),
-     .readHighWriteLow (~weEnBram[`BRAM_POKEY]),
-     .cs0Bar           (pokeyEn),
-     .aud              (ampPWM),
-	  .audio (audio),
-     .clk              (clk)
-     );
-
-  logic [15:0] extAud;
-  logic        feedbackAlpha;
-  logic        lfsrOut0, lfsrOut1;
-
-  logic        otherAud0, otherAud1;
-
-  xnor xnor0(feedbackAlpha, extAud[3], extAud[14]);
-
-  assign lfsrOut0 = extAud[15];
-  assign lfsrOut1 = !(&extAud[14:11]);
-
-  assign audiosel = mod_redbaron ? outputLatch_redbaron : outputLatch;
- /* 
-  always_ff @(posedge clk)
-  begin
-    if (clk_3MHz)
-	   audiosel<=dataFromBram[`BRAM_POKEY];
-  end
-  */
-  always_ff @(posedge clk)
-    if (clk_6KHz_en) begin
-      if (rst | !ampSD) begin
-        extAud <= '0;
-      end else if(ampSD) begin
-        extAud <= (extAud << 1) | feedbackAlpha;
-      end
-    end
-
-  always_ff @(posedge clk)
-    if (clk_6KHz_en) begin
-      if (rst) begin
-        otherAud0 <= '0;
-        otherAud1 <= '0;
-      end else begin
-        if (lfsrOut0) otherAud0 <= ~otherAud0;
-        if (lfsrOut1) otherAud1 <= ~otherAud1;
-      end
-    end
-
-  assign JD[0] = ~outputLatch[3];
-  assign JD[1] = ~outputLatch[2];
-  assign JD[2] = ~otherAud0;
-  assign JD[3] = ~outputLatch[1];
-  assign JD[4] = ~outputLatch[0];
-  assign JD[5] = ~otherAud1;
-
-  always_comb begin
-    //motoren
-    if(outputLatch[5]) begin
-      JD[6] = ~outputLatch[7];
-      JD[7] = ~outputLatch[4];
-    end
-    else begin
-      JD[6] = 1'b1;
-      JD[7] = 1'b1;
-
-    end
-  end
-
+  sound sound(
+    .rst(rst),
+    .clk(clk),
+    .clk_6KHz_en(clk_6KHz_en),
+    .mod_redbaron(mod_redbaron),
+    .should_read(weEnBram[`BRAM_POKEY]), 
+    .buttons(buttons),
+    .addr_to_bram(addrToBram[`BRAM_POKEY]), 
+    .data_to_bram(dataToBram[`BRAM_POKEY]),
+    .audiosel(audiosel),
+    .data_from_bram(dataFromBram[`BRAM_POKEY]),
+    .audio(audio)
+  );
 
 endmodule
 `default_nettype wire

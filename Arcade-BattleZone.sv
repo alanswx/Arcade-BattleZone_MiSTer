@@ -224,7 +224,7 @@ always @(posedge clk_25) if (ioctl_wr && (ioctl_index==254) && !ioctl_addr[24:3]
 
 wire [7:0] JB;
 wire [7:0] arcadebuttons;
-wire [7:0] audiosel;
+wire audiosel;
 wire [7:0] REDBARONBUTTONS;
 wire [7:0] REDBARONJOY;
 always @(*) begin
@@ -251,7 +251,7 @@ always @(*) begin
 				JB <= { /* 7 coin */ ~joy[7],joy[5],joy[6],joy[4],joy[2],joy[3],joy[0],joy[1]};
 				//arcadebuttons<={4'b0,joy[3],joy[0],joy[1]};
 				REDBARONBUTTONS<={joy[4],joy[5],6'b0};		
-				arcadebuttons <= audiosel[0] ? (8'd255-(8'd127 - joya[7:0])) : (8'd255-(8'd127 - joya[15:8]));
+				arcadebuttons <= audiosel ? (8'd255-(8'd127 - joya[7:0])) : (8'd255-(8'd127 - joya[15:8]));
 			end
 			default:
 			begin
@@ -314,7 +314,6 @@ top bzonetop(
 .JB(JB),
 .buttons(arcadebuttons),
 .REDBARONBUTTONS(REDBARONBUTTONS),
-.JD(),
 .audiosel(audiosel),
 .self_test(~status[3]),
 .vgaRed(r),
@@ -326,8 +325,6 @@ top bzonetop(
 .vBlank(vblank),
 .en_r(),
 .audio(audio),
-.ampPWM(),
-.ampSD(),
 .dl_addr(ioctl_addr),
 .dl_data(ioctl_dout),
 .dl_wr(ioctl_wr & !ioctl_index),
