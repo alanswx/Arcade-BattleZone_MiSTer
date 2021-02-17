@@ -464,19 +464,22 @@ wire prog_rom_cs = dl_addr < 'h4000;
     end
   end
 
-  sound sound(
-    .rst(rst),
-    .clk(clk),
-    .clk_6KHz_en(clk_6KHz_en),
-    .mod_redbaron(mod_redbaron),
-    .should_read(weEnBram[`BRAM_POKEY]), 
-    .buttons(buttons),
-    .addr_to_bram(addrToBram[`BRAM_POKEY]), 
-    .data_to_bram(dataToBram[`BRAM_POKEY]),
-    .audiosel(audiosel),
-    .data_from_bram(dataFromBram[`BRAM_POKEY]),
-    .audio(audio)
-  );
+  sound sound
+    (
+     .rst(rst),
+     .clk(clk),
+     .clk_3MHz(clk_3MHz),
+     .clk_3MHz_en(clk_3MHz_en),
+     .clk_6KHz_en(clk_6KHz_en),
+     .mod_redbaron(mod_redbaron),
+     .should_read(weEnBram[`BRAM_POKEY]), 
+     .buttons(buttons),
+     .addr_to_bram(addrToBram[`BRAM_POKEY]), 
+     .data_to_bram(dataToBram[`BRAM_POKEY]),
+     .audiosel(audiosel),
+     .data_from_bram(dataFromBram[`BRAM_POKEY]),
+     .audio(audio)
+     );
 
 endmodule
 `default_nettype wire

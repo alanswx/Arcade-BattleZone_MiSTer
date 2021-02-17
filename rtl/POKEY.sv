@@ -41,14 +41,14 @@ module POKEY
   logic [3:0][7:0]   audf;
   logic [3:0][7:0]   audc;
   logic [7:0]        audCtl, allPot, skCtl;
-   logic [7:0]        dataIn, dataOut;
-   logic              clr;
-   logic              baseClkWave;
-   logic              wave15k, pulse15k, wave64k, pulse64k, wave179m, pulse179m;
-   logic              rand4, rand5, rand17, reduce9;
-   logic [7:0]        rngRead;
-   logic              phi2Rising;
-  logic [3:0][3:0]    bypassMask;
+  logic [7:0]        dataIn, dataOut;
+  logic              clr;
+  logic              baseClkWave;
+  logic              wave15k, pulse15k, wave64k, pulse64k, wave179m, pulse179m;
+  logic              rand4, rand5, rand17, reduce9;
+  logic [7:0]        rngRead;
+  logic              phi2Rising;
+  logic [3:0][3:0]   bypassMask;
 
    //Outputs of the divide-by-N blocks for each channel
    logic [3:0]        divOut;
