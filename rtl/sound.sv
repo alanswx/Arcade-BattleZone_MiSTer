@@ -1,3 +1,10 @@
+
+// Anything sound related goes into this file
+// Reference can be found in:
+// https://arcarc.xmission.com/PDF_Arcade_Atari_Kee/Battlezone/Battlezone_DP-156-2nd-03B.pdf
+// pokey probably should also include the output latch, condluded by comparing the above to:
+// https://i.imgur.com/CTNZr9q.png
+// it seems that the K outputs on the pokey are the output latch outputs
 module sound
   (
    input rst,
@@ -10,20 +17,26 @@ module sound
    input[7:0] buttons,
    input[15:0] addr_to_bram, 
    input[7:0] data_to_bram,
-   output audiosel, 
+   output audiosel,
+   output start_led,
    output[7:0] data_from_bram,
-   output[3:0] audio
+   output[15:0] audio
    );
-
+  
   logic pokeyEn;
   logic pokeyEnRB;
   logic pokeyEnBZ;
-  logic ampPWM;
+
+  wire[3:0] pokey_audio;
+  wire[7:0] outputLatch;
+  wire output_latch_should_read = should_read && (addr_to_bram == 16'h1840 || addr_to_bram == 16'h1808);
   
   // Red Baron has the pokey in a different position
   assign pokeyEnBZ = ~(addr_to_bram >= 16'h1820 && addr_to_bram < 16'h1830);
   assign pokeyEnRB = ~(addr_to_bram >= 16'h1810 && addr_to_bram < 16'h1820);
   assign pokeyEn = mod_redbaron ? pokeyEnRB : pokeyEnBZ;
+  assign audiosel = outputLatch[0];
+  assign start_led = outputLatch[6];
 
   POKEY pokey
     (
@@ -34,18 +47,10 @@ module sound
      .phi2(clk_3MHz),
      .readHighWriteLow(~should_read),
      .cs0Bar(pokeyEn),
-     .aud(ampPWM),
-     .audio(audio),
+     .audio(pokey_audio),
      .clk(clk)
      );
 
-  wire[7:0] outputLatch;
-  wire output_latch_should_read = should_read
-       && 
-       (
-        addr_to_bram == 16'h1840 
-        || addr_to_bram == 16'h1808
-        );
   output_latch output_latch
     (
      .rst(rst),
@@ -55,14 +60,15 @@ module sound
      .data_to_pokey_bram(data_to_bram),
      .out(outputLatch)
      );
-  assign audiosel = outputLatch[0];
 
   audio_output audio_output
     (
      .rst(rst),
      .clk(clk),
      .clk_6KHz_en(clk_6KHz_en),
-     .ampSD(outputLatch[5])
+     .pokey_audio(pokey_audio),
+     .output_latch(outputLatch),
+     .out(audio)
      );
 
 endmodule

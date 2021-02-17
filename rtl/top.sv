@@ -30,23 +30,23 @@ module top
    input wire         clk_i, btnCpuReset,
    input wire [7:0]   DSW0,
    input wire [7:0]   DSW1,
-	input wire [7:0]   REDBARONBUTTONS,
+   input wire [7:0]   REDBARONBUTTONS,
    input wire [7:0]   JB,
-	input wire [7:0]   buttons,
-	input wire         self_test,
-	output logic audiosel,
+   input wire [7:0]   buttons,
+   input wire         self_test,
+   output logic audiosel,
    output logic [3:0] vgaRed, vgaBlue, vgaGreen,
    output logic       Hsync, Vsync,
-	output logic       en_r,
-	output logic       hBlank, vBlank,
-	output logic [3:0] audio,
-	input wire [24:0]  dl_addr,
-	input wire [7:0]   dl_data,
-	input wire         dl_wr,
-	input wire mod_bradley,
-	input wire mod_redbaron,
-	input wire mod_battlezone
-	);
+   output logic       en_r,
+   output logic       hBlank, vBlank,
+   output logic [15:0] audio,
+   input wire [24:0]  dl_addr,
+   input wire [7:0]   dl_data,
+   input wire         dl_wr,
+   input wire mod_bradley,
+   input wire mod_redbaron,
+   input wire mod_battlezone
+   );
 
 
   logic [8:0]         row;
@@ -140,7 +140,7 @@ assign clk=clk_i;
       assign clk_3KHz = (counter3KHz > 'd8191);
       assign clk_6KHz = (counter6KHz > 'd4096);
       assign clk_3MHz_en = counter3MHz == 'd7;
-      assign clk_6MHz_en = counter3MHz[2:0] == 4'd7;
+      assign clk_6MHz_en = counter3MHz[2:0] == 3'd7;
       assign clk_3KHz_en = counter3KHz == 'd8191;
       assign clk_6KHz_en = counter6KHz == 'd4096;
 
@@ -477,6 +477,7 @@ wire prog_rom_cs = dl_addr < 'h4000;
      .addr_to_bram(addrToBram[`BRAM_POKEY]), 
      .data_to_bram(dataToBram[`BRAM_POKEY]),
      .audiosel(audiosel),
+     .start_led(),
      .data_from_bram(dataFromBram[`BRAM_POKEY]),
      .audio(audio)
      );

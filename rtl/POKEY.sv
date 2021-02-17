@@ -31,8 +31,7 @@ module POKEY
    input logic       phi2,
    input logic       readHighWriteLow,
    input logic       cs0Bar,
-   output logic      aud,
-	output logic    [3:0] audio,
+   output logic    [3:0] audio,
    //This clk is the 100 MHz clock, and is not a pin on the POKEY DIP
    input logic       clk
    );
@@ -102,9 +101,7 @@ module POKEY
          );
     end // block: g_AUDIOCHANNEL
   endgenerate
-	
- assign audio = {4{aud}};
-
+  
   volumeMixer finalMix
     (
      .clk(clk),
@@ -114,7 +111,7 @@ module POKEY
      .audc3(audc[2]),
      .audc4(audc[3]),
      .digitalWave(rawWave),
-     .pwmWave(aud)
+     .out(audio)
      );
 
    assign hpfClks = {{divOut[2]},{divOut[3]},{2'b00}};
@@ -204,21 +201,17 @@ module volumeMixer
    input logic       clk, clr,
    input logic [7:0] audc1, audc2, audc3, audc4,
    input logic [3:0] digitalWave,
-   output logic      pwmWave
+   output logic[3:0] out
    );
 
    logic [5:0]            volume;
    logic [5:0]            pwmCnt;
 
-   assign volume =
+   assign out =
                   ((digitalWave[3] | audc4[4]) ? audc4[3:0] : 0) +
                   ((digitalWave[2] | audc3[4]) ? audc3[3:0] : 0) +
                   ((digitalWave[1] | audc2[4]) ? audc2[3:0] : 0) +
                   ((digitalWave[0] | audc1[4]) ? audc1[3:0] : 0);
-
-   m_counter #(6) pwmClk(.Q(pwmCnt), .D(6'd0), .clk(clk), .clr(clr), .load(1'b0), .en(1'b1), .up(1'b1));
-
-   assign pwmWave = (pwmCnt < volume);
 
 endmodule: volumeMixer
 

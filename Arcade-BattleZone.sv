@@ -295,16 +295,10 @@ arcade_video #(640,12) arcade_video
 );
 
 
-
-
 wire reset = (RESET | status[0] | buttons[1] | ioctl_download);
-//wire reset = RESET;
-wire [3:0] audio;
-assign AUDIO_L = {audio, audio,8'b0};
+
 assign AUDIO_R = AUDIO_L;
 assign AUDIO_S = 0;
-
-
 
 top bzonetop(
 .clk_i(clk_50),
@@ -324,17 +318,13 @@ top bzonetop(
 .hBlank(hblank),
 .vBlank(vblank),
 .en_r(),
-.audio(audio),
+.audio(AUDIO_L),
 .dl_addr(ioctl_addr),
 .dl_data(ioctl_dout),
 .dl_wr(ioctl_wr & !ioctl_index),
-
 .mod_bradley(mod==mod_bradley),
 .mod_redbaron(mod==mod_redbaron),
 .mod_battlezone(mod==mod_battlezone)
-
-
-
 );
 
 
