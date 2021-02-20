@@ -59,6 +59,7 @@ source sys/sys.tcl
 source sys/sys_analog.tcl
 source files.qip
 
+set_global_assignment -name SYSTEMVERILOG_FILE rtl/engine_sound.sv
 set_global_assignment -name SYSTEMVERILOG_FILE rtl/analog_sound.sv
 set_global_assignment -name SYSTEMVERILOG_FILE rtl/sound.sv
 set_global_assignment -name SYSTEMVERILOG_FILE rtl/audio_output.sv
