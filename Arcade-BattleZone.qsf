@@ -59,6 +59,9 @@ source sys/sys.tcl
 source sys/sys_analog.tcl
 source files.qip
 
+set_global_assignment -name SYSTEMVERILOG_FILE rtl/iir.sv
+set_global_assignment -name SYSTEMVERILOG_FILE rtl/control_voltage_to_555_out_wavelength.sv
+set_global_assignment -name SYSTEMVERILOG_FILE rtl/lfo.sv
 set_global_assignment -name SYSTEMVERILOG_FILE rtl/engine_sound.sv
 set_global_assignment -name SYSTEMVERILOG_FILE rtl/analog_sound.sv
 set_global_assignment -name SYSTEMVERILOG_FILE rtl/sound.sv

@@ -4,12 +4,14 @@ module engine_sound_tb;
   logic clk;
   logic engine_rev_en;
   int  out;
+
+  logic clk_en = 0;
   
   engine_sound engine_sound
     (
      .rst(rst),
      .clk(clk),
-     .clk_3MHz_en(1'b1),
+     .clk_3MHz_en(1),
      .engine_rev_en(engine_rev_en),
      .out(out)
      );
@@ -37,11 +39,7 @@ module engine_sound_tb;
     $fwrite(file,"%s\n", "value");
     
     engine_rev_en = 1;
-    run_times(1);
-    engine_rev_en = 0;
-    run_times(12000);
-    engine_rev_en = 1;
-    run_times(1);
+    run_times(100000);
     engine_rev_en = 0;
     run_times(100000);
 

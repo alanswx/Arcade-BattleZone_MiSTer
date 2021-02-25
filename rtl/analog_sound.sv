@@ -13,18 +13,18 @@ module analog_sound
    );
 
   
-  wire[3:0] engine;
-  
+  wire[15:0] engine;
   engine_sound engine_sound
     (
      .rst(rst),
      .clk(clk),
      .clk_3MHz_en(clk_3MHz_en),
      .engine_rev_en(engine_rev_en),
+     .motor_en(motor_en),
      .out(engine)
      );
 
-  wire[15:0] engine_mixed = {{3{1'b0}},engine, {9{1'b0}}} & {16{motor_en}};
+  wire[15:0] engine_mixed = engine & {16{motor_en}};
   
   assign out = engine_mixed;
   

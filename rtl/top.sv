@@ -58,6 +58,7 @@ module top
   logic               lineDone, lineDone_pipe;
   logic               full;
   logic               empty;
+  logic               rst;
   logic               lrWrite;
   logic [15:0]        pc;
   logic [15:0]        inst;
@@ -71,6 +72,7 @@ module top
   assign readyLine = ~empty;
 
   logic               rst_unstable;
+  logic               clk;
 
   always @(posedge clk) begin
     rst_unstable <= btnCpuReset;
@@ -463,7 +465,7 @@ wire prog_rom_cs = dl_addr < 'h4000;
   end
 
   sound sound
-    (     
+    (
      .rst(rst),
      .clk(clk),
      .clk_3MHz(clk_3MHz),
