@@ -1,3 +1,6 @@
+// FIXME: improve shape of LFO, currently it is a triangle, in reality it is somewhere between triangle and sine
+// FIXME: improve accuracy of the iir by analysing the analog filter on the schematic
+
 module engine_sound
   (
    input rst,
@@ -29,7 +32,7 @@ module engine_sound
      .wave_length(wave_length)
      );
   
-  iir #(7,32) iir
+  iir #(9,32) iir
     (
      .clk(clk),
      .clk_3MHz_en(clk_3MHz_en),
@@ -69,7 +72,7 @@ module engine_sound
       	counter <= counter + 1;
       end
     end
-    after_counters <= (counter1 + counter2) <<< 10;
+    after_counters <= (counter1 + counter2) <<< 11;
   end
   
 endmodule
