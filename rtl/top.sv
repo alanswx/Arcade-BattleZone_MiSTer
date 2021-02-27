@@ -470,6 +470,7 @@ wire prog_rom_cs = dl_addr < 'h4000;
      .clk(clk),
      .clk_3MHz(clk_3MHz),
      .clk_3MHz_en(clk_3MHz_en),
+     .clk_6KHz_en(clk_6KHz_en),
      .mod_redbaron(mod_redbaron),
      .should_read(weEnBram[`BRAM_POKEY]), 
      .buttons(buttons),

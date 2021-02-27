@@ -3,6 +3,7 @@ module audio_output
    input rst,
    input clk,
    input clk_3MHz_en,
+   input clk_6KHz_en,
    input[3:0] pokey_audio,
    input[7:0] output_latch,
    output shortint out
@@ -20,6 +21,8 @@ module audio_output
      .rst(rst),
      .clk(clk),
      .clk_3MHz_en(clk_3MHz_en),
+     .clk_6KHz_en(clk_6KHz_en),
+     .sound_enable(sound_enable),
      .motor_en(output_latch[7]),
      .engine_rev_en(output_latch[4]),
      .shell_ls(output_latch[3]),
@@ -40,7 +43,7 @@ module audio_output
   end
 
   task mix_sound;
-    out <= pokey_amplified + analog_audio;
+    out <= (pokey_amplified >> 2) + (analog_audio >> 1);
   endtask // mix_sound
   
 endmodule

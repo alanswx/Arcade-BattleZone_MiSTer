@@ -59,6 +59,12 @@ source sys/sys.tcl
 source sys/sys_analog.tcl
 source files.qip
 
+set_global_assignment -name SYSTEMVERILOG_FILE rtl/noise_shifters.sv
+set_global_assignment -name SYSTEMVERILOG_FILE rtl/noise_sound.sv
+set_global_assignment -name SYSTEMVERILOG_FILE rtl/ls164.sv
+set_global_assignment -name SYSTEMVERILOG_FILE rtl/ls74.sv
+set_global_assignment -name SYSTEMVERILOG_FILE rtl/jk74109.sv
+set_global_assignment -name SYSTEMVERILOG_FILE rtl/noise_source_shell_explo.sv
 set_global_assignment -name SYSTEMVERILOG_FILE rtl/iir.sv
 set_global_assignment -name SYSTEMVERILOG_FILE rtl/control_voltage_to_555_out_wavelength.sv
 set_global_assignment -name SYSTEMVERILOG_FILE rtl/lfo.sv
