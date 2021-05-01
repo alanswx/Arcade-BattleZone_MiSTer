@@ -24,9 +24,9 @@ module noise_sound
      );
 
 
-  wire[31:0] filtered;
+  wire[15:0] filtered;
   
-  iir #(FILTER_STRENGTH,32) iir
+  iir #(FILTER_STRENGTH,16) iir
     (
      .clk(clk),
      .clk_3MHz_en(clk_3MHz_en),
@@ -35,9 +35,9 @@ module noise_sound
      );
 
   
-  int amp = 0;
+  shortint amp = 0;
 
-  assign out = ((filtered >> 10) * (amp  >> 10));
+  assign out = ((filtered >> 16'd10) * (amp  >> 16'd10));
 
   always @(posedge clk) begin
     if(clk_3MHz_en)begin

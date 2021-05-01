@@ -91,6 +91,7 @@ module top
   logic              clk_6MHz_en;
   logic              clk_3KHz_en;
   logic              clk_6KHz_en;
+  logic              clk_24KHz_en;
 
   logic              coreReset;
 
@@ -143,6 +144,7 @@ assign clk=clk_i;
       assign clk_6MHz_en = counter3MHz[2:0] == 3'd7;
       assign clk_3KHz_en = counter3KHz == 'd8191;
       assign clk_6KHz_en = counter6KHz == 'd4096;
+      assign clk_24KHz_en = counter6KHz == 'd4096 || counter6KHz == 'd2048 || counter6KHz == 'd6144;
 
     end else begin : g_NO_CLK_DIV
 
@@ -470,14 +472,13 @@ wire prog_rom_cs = dl_addr < 'h4000;
      .clk(clk),
      .clk_3MHz(clk_3MHz),
      .clk_3MHz_en(clk_3MHz_en),
-     .clk_6KHz_en(clk_6KHz_en),
+     .clk_24KHz_en(clk_24KHz_en),
      .mod_redbaron(mod_redbaron),
      .should_read(weEnBram[`BRAM_POKEY]), 
      .buttons(buttons),
      .addr_to_bram(addrToBram[`BRAM_POKEY]), 
      .data_to_bram(dataToBram[`BRAM_POKEY]),
      .audiosel(audiosel),
-     .start_led(),
      .data_from_bram(dataFromBram[`BRAM_POKEY]),
      .audio(audio)
      );

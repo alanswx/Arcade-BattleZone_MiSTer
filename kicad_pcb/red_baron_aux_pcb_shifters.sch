@@ -1,0 +1,134 @@
+EESchema Schematic File Version 4
+EELAYER 30 0
+EELAYER END
+$Descr A4 11693 8268
+encoding utf-8
+Sheet 1 1
+Title ""
+Date ""
+Rev ""
+Comp ""
+Comment1 ""
+Comment2 ""
+Comment3 ""
+Comment4 ""
+$EndDescr
+Wire Wire Line
+	7000 3750 7450 3750
+Wire Wire Line
+	5300 3750 5700 3750
+Wire Wire Line
+	7000 3650 7250 3650
+$Comp
+L 74xx_IEEE:74164 U?
+U 1 1 60791D04
+P 4750 2950
+F 0 "U?" H 4750 3516 50  0000 C CNN
+F 1 "74164" H 4750 3425 50  0000 C CNN
+F 2 "" H 4750 2950 50  0001 C CNN
+F 3 "" H 4750 2950 50  0001 C CNN
+	1    4750 2950
+	1    0    0    -1  
+$EndComp
+$Comp
+L 74xx_IEEE:74164 U?
+U 1 1 60791D0A
+P 6450 2950
+F 0 "U?" H 6450 3516 50  0000 C CNN
+F 1 "74164" H 6450 3425 50  0000 C CNN
+F 2 "" H 6450 2950 50  0001 C CNN
+F 3 "" H 6450 2950 50  0001 C CNN
+	1    6450 2950
+	1    0    0    -1  
+$EndComp
+$Comp
+L 74xx:74LS86 U?
+U 1 1 60791D10
+P 3200 2750
+F 0 "U?" H 3200 3075 50  0000 C CNN
+F 1 "74LS86" H 3200 2984 50  0000 C CNN
+F 2 "" H 3200 2750 50  0001 C CNN
+F 3 "74xx/74ls86.pdf" H 3200 2750 50  0001 C CNN
+	1    3200 2750
+	1    0    0    -1  
+$EndComp
+Wire Wire Line
+	3500 2750 3800 2750
+Wire Wire Line
+	3800 2750 3800 2950
+Connection ~ 3800 2950
+Wire Wire Line
+	3800 2950 4200 2950
+Wire Wire Line
+	3800 2950 3800 3050
+Wire Wire Line
+	3800 3050 4200 3050
+Wire Wire Line
+	2450 2850 2900 2850
+Wire Wire Line
+	2900 2650 2900 2000
+Wire Wire Line
+	2900 2000 5600 2000
+Wire Wire Line
+	5600 2000 5600 3000
+Wire Wire Line
+	5600 3000 5300 3000
+Entry Wire Line
+	2100 1700 2200 1800
+Entry Wire Line
+	2100 1850 2200 1950
+Wire Wire Line
+	4200 2700 4200 1800
+Connection ~ 4200 1800
+Wire Wire Line
+	4200 1800 2200 1800
+Wire Wire Line
+	5900 1800 4200 1800
+Wire Wire Line
+	5900 2700 5900 1800
+Wire Wire Line
+	5900 2800 5700 2800
+Wire Wire Line
+	5700 2800 5700 1950
+Wire Wire Line
+	5700 1950 4000 1950
+Connection ~ 4000 1950
+Wire Wire Line
+	4200 2800 4000 2800
+Wire Wire Line
+	4000 2800 4000 1950
+Wire Wire Line
+	4000 1950 2200 1950
+Wire Wire Line
+	7250 3650 7250 2200
+Wire Wire Line
+	7250 2200 1850 2200
+$Comp
+L 74xGxx:74AHC1G04 U?
+U 1 1 60791D31
+P 2200 2850
+F 0 "U?" H 2175 3117 50  0000 C CNN
+F 1 "74AHC1G04" H 2175 3026 50  0000 C CNN
+F 2 "" H 2200 2850 50  0001 C CNN
+F 3 "http://www.ti.com/lit/sg/scyt129e/scyt129e.pdf" H 2200 2850 50  0001 C CNN
+	1    2200 2850
+	1    0    0    -1  
+$EndComp
+Wire Wire Line
+	1850 2850 1900 2850
+Wire Wire Line
+	1850 2200 1850 2850
+Wire Wire Line
+	5700 3750 5700 3050
+Connection ~ 5700 3050
+Wire Wire Line
+	5700 2950 5900 2950
+Wire Wire Line
+	5700 3050 5900 3050
+Wire Wire Line
+	5700 3050 5700 2950
+Text Label 1800 1900 0    50   ~ 0
+12KHz
+Text Label 1700 1750 0    50   ~ 0
+noise-rst
+$EndSCHEMATC

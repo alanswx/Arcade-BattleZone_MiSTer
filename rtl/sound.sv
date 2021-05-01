@@ -11,15 +11,13 @@ module sound
    input clk,
    input clk_3MHz,
    input clk_3MHz_en,
-   input clk_6KHz_en,
-   input sound_en,
+   input clk_24KHz_en,
    input mod_redbaron,
    input should_read, 
    input[7:0] buttons,
    input[15:0] addr_to_bram, 
    input[7:0] data_to_bram,
    output audiosel,
-   output start_led,
    output[7:0] data_from_bram,
    output[15:0] audio
    );
@@ -37,7 +35,6 @@ module sound
   assign pokeyEnRB = ~(addr_to_bram >= 16'h1810 && addr_to_bram < 16'h1820);
   assign pokeyEn = mod_redbaron ? pokeyEnRB : pokeyEnBZ;
   assign audiosel = outputLatch[0];
-  assign start_led = outputLatch[6];
 
   POKEY pokey
     (
@@ -67,7 +64,7 @@ module sound
      .rst(rst),
      .clk(clk),
      .clk_3MHz_en(clk_3MHz_en),
-     .clk_6KHz_en(clk_6KHz_en),
+     .clk_24KHz_en(clk_24KHz_en),
      .pokey_audio(pokey_audio),
      .output_latch(outputLatch),
      .out(audio)

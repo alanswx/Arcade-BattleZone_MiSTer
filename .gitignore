@@ -41,3 +41,8 @@ qar_info.json
 *.vvp
 *.*#
 venv
+spice/*.wav
+spice/output.*
+./spice/history
+.idea
+spice/.ipynb_checkpoints/

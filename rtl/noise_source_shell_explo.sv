@@ -2,7 +2,7 @@ module noise_source_shell_explo
   (
    input clk,
    input clk_3MHz_en,
-   input clk_6KHz_en,
+   input clk_24KHz_en,
    input sound_enable,
    input shell_en,
    input shell_ls,
@@ -17,7 +17,7 @@ module noise_source_shell_explo
   noise_shifters noise_shifters
     (
      .clk(clk),
-     .clk_6KHz_en(clk_6KHz_en),
+     .clk_en(clk_24KHz_en),
      .sound_enable(sound_enable),
      .shell(shell),
      .explo(explo)

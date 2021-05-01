@@ -12,9 +12,10 @@ module ls164
       if (rst) begin
 	Q <= 8'b0;
       end else if(a && b) begin
-	Q[0] <= 1;
+	Q <= {Q[6:0], 1'b1};
+      end else begin
+	Q <= Q << 1;
       end
-      Q <= Q << 1;
     end
   end
 endmodule
