@@ -42,6 +42,7 @@ qar_info.json
 *.*#
 venv
 spice/*.wav
+rtl/*.wav
 spice/output.*
 ./spice/history
 .idea

@@ -3,7 +3,7 @@ module audio_output
    input rst,
    input clk,
    input clk_3MHz_en,
-   input clk_24KHz_en,
+   input clk_12KHz_en,
    input[3:0] pokey_audio,
    input[7:0] output_latch, // output_latch[6] is unused, it is the start_led
    output shortint out
@@ -20,7 +20,7 @@ module audio_output
      .rst(rst),
      .clk(clk),
      .clk_3MHz_en(clk_3MHz_en),
-     .clk_24KHz_en(clk_24KHz_en),
+     .clk_12KHz_en(clk_12KHz_en),
      .sound_enable(sound_enable),
      .motor_en(output_latch[7]),
      .engine_rev_en(output_latch[4]),
@@ -31,7 +31,7 @@ module audio_output
      .out(analog_audio)
      );
 
-  iir #(6,16) iir_pokey // FIXME: calculate the needed depth of this filter, and do there need to be multiple iirs stacked?
+  iir #(4,16) iir_pokey // FIXME: calculate the needed depth of this filter, and do there need to be multiple iirs stacked?
     (
      .clk(clk),
      .clk_3MHz_en(clk_3MHz_en),
@@ -50,7 +50,7 @@ module audio_output
   end
 
   task mix_sound;
-    out <= (pokey_filtered >> 2) + (analog_audio >> 2);
+    out <= (pokey_filtered >> 3) + (analog_audio >> 1);
   endtask
   
 endmodule

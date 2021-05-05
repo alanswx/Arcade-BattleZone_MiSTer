@@ -2,7 +2,7 @@ module noise_shifters
   (
    input rst,
    input clk,
-   input clk_en,
+   input clk_12KHz_en,
    input sound_enable,
    output shell,
    output explo
@@ -27,9 +27,9 @@ module noise_shifters
     (
      .rst(rst),
      .clk(clk),
-     .clk_en(clk_en),
+     .clk_en(clk_12KHz_en),
      .j(q_),
-     .k(q_),
+     .k(~q_),
      .q(),
      .q_(q_)
      );
@@ -37,7 +37,7 @@ module noise_shifters
 
   ls164 ls164_top
     (
-     .rst(!sound_enable),
+     .rst(~sound_enable),
      .clk(clk),
      .clk_en(q_),
      .a(Q_bottom[7]),
@@ -47,7 +47,7 @@ module noise_shifters
  
   ls164 ls164_bottom
     (
-     .rst(!sound_enable),
+     .rst(~sound_enable),
      .clk(clk),
      .clk_en(q_),
      .a(ab_bottom),

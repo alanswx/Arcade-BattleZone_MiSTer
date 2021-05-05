@@ -1,3 +1,4 @@
+import sys
 import pandas as pd
 import soundfile as sf
 
@@ -7,4 +8,4 @@ def convert_to_wav(path):
     sf.write(path+'.wav', data, sample_rate_hz)
 
 sample_rate_hz = 48000
-convert_to_wav("engine.csv")
+convert_to_wav(sys.argv[1])

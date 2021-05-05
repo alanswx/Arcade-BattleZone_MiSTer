@@ -90,8 +90,7 @@ module top
   logic              clk_3MHz_en;
   logic              clk_6MHz_en;
   logic              clk_3KHz_en;
-  logic              clk_6KHz_en;
-  logic              clk_24KHz_en;
+  logic              clk_12KHz_en;
 
   logic              coreReset;
 
@@ -118,64 +117,61 @@ assign clk=clk_i;
     if (CLK_DIV == "TRUE") begin : g_CLK_DIV
       logic [3:0]        counter3MHz;
       logic [13:0]       counter3KHz;
-      logic [12:0]       counter6KHz;
+      logic [11:0]       counter12KHz;
 
       initial begin
         counter3MHz = 'd8;
         counter3KHz = 'd8192;
-        counter6KHz = 'd4096;
+        counter12KHz = 'd2048;
       end
       always @(posedge clk) begin
         if(rst) begin
           counter3MHz <= 'd8;
           counter3KHz <= 'd8192;
-          counter6KHz <= 'd4096;
+          counter12KHz <= counter12KHz + 'd2048;
         end else begin
           counter3MHz <= counter3MHz + 'd1;
           counter3KHz <= counter3KHz + 'd1;
-          counter6KHz <= counter6KHz + 'd1;
+          counter12KHz <= counter12KHz + 'd1;
         end
       end
 
       assign clk_3MHz = (counter3MHz > 'd7);
       assign clk_3KHz = (counter3KHz > 'd8191);
-      assign clk_6KHz = (counter6KHz > 'd4096);
       assign clk_3MHz_en = counter3MHz == 'd7;
       assign clk_6MHz_en = counter3MHz[2:0] == 3'd7;
       assign clk_3KHz_en = counter3KHz == 'd8191;
-      assign clk_6KHz_en = counter6KHz == 'd4096;
-      assign clk_24KHz_en = counter6KHz == 'd4096 || counter6KHz == 'd2048 || counter6KHz == 'd6144;
+      assign clk_12KHz_en = clk_12KHz_en == 'd2047;
 
     end else begin : g_NO_CLK_DIV
 
       logic [4:0] counter3MHz;
       logic [14:0] counter3KHz;
-      logic [13:0] counter6KHz;
+      logic [12:0] counter12KHz;
 
       initial begin
         counter3MHz = 'd16;
         counter3KHz = 'd16384;
-        counter6KHz = 'd8192;
+        counter12KHz = 'd4096;
       end
       always @(posedge clk) begin
         if(rst) begin
           counter3MHz <= 'd16;
           counter3KHz <= 'd16384;
-          counter6KHz <= 'd8192;
+          counter12KHz <= 'd4096;
         end else begin
           counter3MHz <= counter3MHz + 'd1;
           counter3KHz <= counter3KHz + 'd1;
-          counter6KHz <= counter6KHz + 'd1;
+          counter12KHz <= counter12KHz + 'd1;
         end
       end
 
       assign clk_3MHz = (counter3MHz > 'd15);
       assign clk_3KHz = (counter3KHz > 'd16383);
-      assign clk_6KHz = (counter6KHz > 'd8192);
       assign clk_3MHz_en = counter3MHz == 'd15;
       assign clk_6MHz_en = counter3MHz[3:0] == 5'd15;
       assign clk_3KHz_en = counter3KHz == 'd16383;
-      assign clk_6KHz_en = counter6KHz == 'd8192;
+      assign clk_12KHz_en = counter12KHz == 'd4095;
 
     end // else: !if(CLK_DIV == "TRUE")
   endgenerate
@@ -472,7 +468,7 @@ wire prog_rom_cs = dl_addr < 'h4000;
      .clk(clk),
      .clk_3MHz(clk_3MHz),
      .clk_3MHz_en(clk_3MHz_en),
-     .clk_24KHz_en(clk_24KHz_en),
+     .clk_12KHz_en(clk_12KHz_en),
      .mod_redbaron(mod_redbaron),
      .should_read(weEnBram[`BRAM_POKEY]), 
      .buttons(buttons),

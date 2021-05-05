@@ -1,28 +1,39 @@
-module noise_shifters_tb;
+module noise_source_shell_explo_tb;
 
   logic clk;
-  logic sound_enable = 0;
+  logic clk_3MHz_en=1;
+  logic clk_12KHz_en=1;
+  logic sound_enable = 1;
+  logic shell_en = 1;
+  logic explo_en = 1;
+  logic shell_ls = 1;
+  logic explo_ls = 1;
   logic rst = 0;
-  wire explo_noise, shell_noise;
+  wire[15:0] explo_noise, shell_noise;
 
-  noise_shifters noise_shifters
-    (
-     .rst(rst),
-     .clk(clk),
-     .clk_12KHz_en(1'b1),
-     .sound_enable(sound_enable),
-     .shell(shell_noise),
-     .explo(explo_noise)
-     );
+  noise_source_shell_explo noise_source_shell_explo(
+    clk,
+    clk_3MHz_en,
+    clk_12KHz_en,
+    sound_enable,
+    shell_en,
+    shell_ls,
+    explo_en,
+    explo_ls,
+    explo_noise,
+    shell_noise
+  );
 
   int shell_file, explo_file;
-  
+  int cycle = 0;
   task run_times(int times);
     for(int i = 0; i < times; i++) begin
       #(i*4);
+      cycle += 1;
+      clk_12KHz_en = (cycle % 4) == 0;
       #1 clk = 1;
       #1 clk = 0;
-      #1;
+
 
       $fwrite(shell_file,"%d\n", shell_noise);
       $fwrite(explo_file,"%d\n", explo_noise);
@@ -34,13 +45,16 @@ module noise_shifters_tb;
     explo_file = $fopen("explo_noise.csv","wb");
     $fwrite(shell_file,"%s\n", "value");
     $fwrite(explo_file,"%s\n", "value");    
-    rst = 0;
+    rst = 1;
     run_times(1);
     rst = 0;
     run_times(5);
     #1; 
     sound_enable = 1;
-    run_times(500);
+    run_times(5000);
+    explo_en = 0;
+    shell_en = 0;
+    run_times(100000);
     $fclose(shell_file);
     $fclose(explo_file);
   end

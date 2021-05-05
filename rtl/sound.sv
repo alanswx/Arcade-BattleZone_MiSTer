@@ -11,7 +11,7 @@ module sound
    input clk,
    input clk_3MHz,
    input clk_3MHz_en,
-   input clk_24KHz_en,
+   input clk_12KHz_en,
    input mod_redbaron,
    input should_read, 
    input[7:0] buttons,
@@ -64,7 +64,7 @@ module sound
      .rst(rst),
      .clk(clk),
      .clk_3MHz_en(clk_3MHz_en),
-     .clk_24KHz_en(clk_24KHz_en),
+     .clk_12KHz_en(clk_12KHz_en),
      .pokey_audio(pokey_audio),
      .output_latch(outputLatch),
      .out(audio)
