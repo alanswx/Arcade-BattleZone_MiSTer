@@ -35,7 +35,7 @@ module noise_sound
   logic[31:0] amp = 0;
 
   assign unfiltered = ({{17{1'b0}}, {15{noise}}} * amp ) >> 16;
-  logic[5:0] amp_divider = 0;
+  logic[6:0] amp_divider = 0;
 
   always @(posedge clk) begin
     if(clk_3MHz_en)begin

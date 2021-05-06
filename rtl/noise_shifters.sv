@@ -27,7 +27,7 @@ module noise_shifters
     (
      .rst(~sound_enable),
      .clk(clk),
-     .clk_en(clk_12KHz_en),
+     .clk_en(q_clk_en),
      .a(Q_bottom[7]),
      .b(Q_bottom[7]),
      .Q(Q_top)
@@ -37,7 +37,7 @@ module noise_shifters
     (
      .rst(~sound_enable),
      .clk(clk),
-     .clk_en(clk_12KHz_en),
+     .clk_en(q_clk_en),
      .a(ab_bottom),
      .b(ab_bottom),
      .Q(Q_bottom)
@@ -47,7 +47,7 @@ module noise_shifters
   logic jk_counter = 0;
   logic q_clk_en = 0;
   always @(clk) begin
-    q_clk_en <= clk_12KHz_en && jk_counter;
+    q_clk_en <= clk_12KHz_en && jk_counter == 1;
     if(clk_12KHz_en)begin
       jk_counter <= jk_counter + 1;
     end

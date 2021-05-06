@@ -25,7 +25,7 @@ module noise_source_shell_explo
      );
   
   // TODO: check the cutoff and amp decay needed
-  noise_sound #(10, 8) shell_noise
+  noise_sound #(7, 7) shell_noise
     (
      .clk(clk),
      .clk_3MHz_en(clk_3MHz_en),
@@ -36,7 +36,7 @@ module noise_source_shell_explo
      );
 
   // TODO: check the cutoff and amp decay needed
-  noise_sound #(10, 2) explo_noise
+  noise_sound #(8, 2) explo_noise
     (
      .clk(clk),
      .clk_3MHz_en(clk_3MHz_en),
