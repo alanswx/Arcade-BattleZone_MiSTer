@@ -12,9 +12,8 @@ module noise_source_shell_explo
    output[15:0] noise_shell
    );
 
-  logic explo,shell;
-  logic last_explo,last_shell;
-  logic explo_clk_en, shell_clk_en;
+  // logic explo,shell;
+  // logic explo_clk_en, shell_clk_en;
 
   noise_shifters noise_shifters
     (
@@ -25,33 +24,27 @@ module noise_source_shell_explo
      .explo(explo)
      );
   
-  noise_sound #(5, 2) shell_noise
+  // TODO: check the cutoff and amp decay needed
+  noise_sound #(10, 8) shell_noise
     (
      .clk(clk),
      .clk_3MHz_en(clk_3MHz_en),
-     .clk_en(shell_clk_en),
+     .clk_en(shell),
      .noise_en(shell_en),
      .loud_soft(shell_ls),
      .out(noise_shell)
      );
 
-  noise_sound #(6, 1) explo_noise
+  // TODO: check the cutoff and amp decay needed
+  noise_sound #(10, 2) explo_noise
     (
      .clk(clk),
      .clk_3MHz_en(clk_3MHz_en),
-     .clk_en(explo_clk_en),
+     .clk_en(explo),
      .noise_en(explo_en),
      .loud_soft(explo_ls),
      .out(noise_explo)
      );
 
-  always @(clk) begin
-    if(clk_3MHz_en)begin
-      explo_clk_en <= explo != last_explo && explo;
-      shell_clk_en <= shell != last_shell && shell;
-      last_explo <= explo;
-      last_shell <= shell;
-    end
-  end
 
 endmodule 

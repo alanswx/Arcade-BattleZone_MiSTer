@@ -23,23 +23,11 @@ module noise_shifters
 			    );
   assign shell = Q_top[7];
 
-  jk74109 fk_flipflop
-    (
-     .rst(rst),
-     .clk(clk),
-     .clk_en(clk_12KHz_en),
-     .j(q_),
-     .k(~q_),
-     .q(),
-     .q_(q_)
-     );
-
-
   ls164 ls164_top
     (
      .rst(~sound_enable),
      .clk(clk),
-     .clk_en(q_),
+     .clk_en(clk_12KHz_en),
      .a(Q_bottom[7]),
      .b(Q_bottom[7]),
      .Q(Q_top)
@@ -49,11 +37,21 @@ module noise_shifters
     (
      .rst(~sound_enable),
      .clk(clk),
-     .clk_en(q_),
+     .clk_en(clk_12KHz_en),
      .a(ab_bottom),
      .b(ab_bottom),
      .Q(Q_bottom)
      );
+
+  
+  logic jk_counter = 0;
+  logic q_clk_en = 0;
+  always @(clk) begin
+    q_clk_en <= clk_12KHz_en && jk_counter;
+    if(clk_12KHz_en)begin
+      jk_counter <= jk_counter + 1;
+    end
+  end
   
 endmodule
   

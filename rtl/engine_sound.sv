@@ -32,7 +32,7 @@ module engine_sound
      .wave_length(wave_length)
      );
   
-  iir #(9,32) iir
+  iir #(7,32) iir
     (
      .clk(clk),
      .clk_3MHz_en(clk_3MHz_en),

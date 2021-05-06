@@ -15,31 +15,31 @@ module noise_sound
   
   ls74 ls74_top
     (
-     .clk(clk),
-     .clk_en(clk_en),
+     .clk(clk_en),
      .D(noise),
      .q(),
      .q_(noise)
      );
 
+  wire[15:0] unfiltered;
 
-  wire[31:0] filtered;
   iir #(FILTER_STRENGTH,16) iir
     (
      .clk(clk),
      .clk_3MHz_en(clk_3MHz_en),
-     .in({{1{1'b0}}, {15{noise}}}),
-     .out(filtered)
+     .in(unfiltered),
+     .out(out)
      );
 
   
-  logic[15:0] amp = 0;
+  logic[31:0] amp = 0;
 
-  assign out = (filtered * amp ) >> 16;
-  logic amp_divider = 0;
+  assign unfiltered = ({{17{1'b0}}, {15{noise}}} * amp ) >> 16;
+  logic[5:0] amp_divider = 0;
+
   always @(posedge clk) begin
     if(clk_3MHz_en)begin
-      amp_divider = ~amp_divider;
+      amp_divider = amp_divider +1;
       if(noise_en)begin
         if(loud_soft)begin
           amp <= 1 <<< 15;          
@@ -47,8 +47,8 @@ module noise_sound
           amp <= 1 <<< 14;
         end
       end else if(amp > 4) begin
-        if(amp_divider)begin
-          amp <= amp -DECAY; // FIXME: this should probably be a curve, not linear
+        if(amp_divider == 0)begin
+          amp <= (amp * (65536 - DECAY)) >>> 16;
         end
       end else begin
         amp <= 0;

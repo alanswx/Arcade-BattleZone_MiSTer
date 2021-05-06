@@ -65,6 +65,7 @@ module sound
      .clk(clk),
      .clk_3MHz_en(clk_3MHz_en),
      .clk_12KHz_en(clk_12KHz_en),
+     .mod_redbaron(mod_redbaron),
      .pokey_audio(pokey_audio),
      .output_latch(outputLatch),
      .out(audio)

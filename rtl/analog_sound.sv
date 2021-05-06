@@ -4,6 +4,7 @@ module analog_sound
    input clk,
    input clk_3MHz_en,
    input clk_12KHz_en,
+   input mod_redbaron,
    input sound_enable,
    input motor_en,
    input engine_rev_en,
@@ -44,6 +45,6 @@ module analog_sound
 
   wire[15:0] engine_mixed = engine & {16{motor_en}};
   
-  assign out = (engine_mixed >> 3) + (explo >> 1) + (shell >> 1);
+  assign out = (engine_mixed >> 3) + (explo >> 2) + (shell >> 2);
   
 endmodule

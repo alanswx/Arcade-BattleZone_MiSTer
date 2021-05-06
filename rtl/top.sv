@@ -91,6 +91,7 @@ module top
   logic              clk_6MHz_en;
   logic              clk_3KHz_en;
   logic              clk_12KHz_en;
+  logic              clk_48KHz_en;
 
   logic              coreReset;
 
@@ -118,21 +119,25 @@ assign clk=clk_i;
       logic [3:0]        counter3MHz;
       logic [13:0]       counter3KHz;
       logic [11:0]       counter12KHz;
+      logic [9:0]       counter48KHz;
 
       initial begin
         counter3MHz = 'd8;
         counter3KHz = 'd8192;
         counter12KHz = 'd2048;
+        counter48KHz = 'd512;
       end
       always @(posedge clk) begin
         if(rst) begin
           counter3MHz <= 'd8;
           counter3KHz <= 'd8192;
-          counter12KHz <= counter12KHz + 'd2048;
+          counter12KHz <= 'd2048;
+          counter48KHz <= 'd512;
         end else begin
           counter3MHz <= counter3MHz + 'd1;
           counter3KHz <= counter3KHz + 'd1;
           counter12KHz <= counter12KHz + 'd1;
+          counter48KHz <= counter48KHz + 'd1;
         end
       end
 
@@ -141,28 +146,33 @@ assign clk=clk_i;
       assign clk_3MHz_en = counter3MHz == 'd7;
       assign clk_6MHz_en = counter3MHz[2:0] == 3'd7;
       assign clk_3KHz_en = counter3KHz == 'd8191;
-      assign clk_12KHz_en = clk_12KHz_en == 'd2047;
+      assign clk_12KHz_en = counter12KHz == 'd2047;
+      assign clk_48KHz_en = counter48KHz == 'd511;
 
     end else begin : g_NO_CLK_DIV
 
       logic [4:0] counter3MHz;
       logic [14:0] counter3KHz;
       logic [12:0] counter12KHz;
+      logic [12:0] counter48KHz;
 
       initial begin
         counter3MHz = 'd16;
         counter3KHz = 'd16384;
         counter12KHz = 'd4096;
+        counter48KHz = 'd1024;
       end
       always @(posedge clk) begin
         if(rst) begin
           counter3MHz <= 'd16;
           counter3KHz <= 'd16384;
           counter12KHz <= 'd4096;
+          counter12KHz <= 'd1024;
         end else begin
           counter3MHz <= counter3MHz + 'd1;
           counter3KHz <= counter3KHz + 'd1;
           counter12KHz <= counter12KHz + 'd1;
+          counter48KHz <= counter48KHz + 'd1;
         end
       end
 
@@ -172,6 +182,7 @@ assign clk=clk_i;
       assign clk_6MHz_en = counter3MHz[3:0] == 5'd15;
       assign clk_3KHz_en = counter3KHz == 'd16383;
       assign clk_12KHz_en = counter12KHz == 'd4095;
+      assign clk_48KHz_en = counter48KHz == 'd1023;
 
     end // else: !if(CLK_DIV == "TRUE")
   endgenerate
