@@ -52,7 +52,7 @@ module audio_output
   end
 
   task mix_sound;
-    out <= (pokey_filtered >> 3) + (analog_audio >> 1);
+    out <= (pokey_filtered >> 2) + (analog_audio >> 1);
   endtask
   
 endmodule

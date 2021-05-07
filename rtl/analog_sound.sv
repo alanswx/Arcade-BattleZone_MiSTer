@@ -45,6 +45,6 @@ module analog_sound
 
   wire[15:0] engine_mixed = engine & {16{motor_en}};
   
-  assign out = (engine_mixed >> 3) + (explo >> 3) + (shell >> 3);
+  assign out = (engine_mixed >> 2) + (explo >> 3) + (shell >> 3);
   
 endmodule
