@@ -44,7 +44,7 @@ module noise_sound
         if(loud_soft)begin
           amp <= 1 <<< 15;          
         end else begin
-          amp <= 1 <<< 14;
+          amp <= (1 <<< 15) - (1 << 13);
         end
       end else if(amp > 4) begin
         if(amp_divider == 0)begin
