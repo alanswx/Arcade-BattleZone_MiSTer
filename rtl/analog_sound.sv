@@ -4,6 +4,7 @@ module analog_sound
    input clk,
    input clk_3MHz_en,
    input clk_12KHz_en,
+   input clk_48KHz_en,
    input mod_redbaron,
    input sound_enable,
    input motor_en,
@@ -12,6 +13,7 @@ module analog_sound
    input shell_en,
    input explo_ls,
    input explo_en,
+   input[3:0] crsh,
    output shortint out
    );
 
@@ -44,7 +46,25 @@ module analog_sound
      );
 
   wire[15:0] engine_mixed = engine & {16{motor_en}};
-  
-  assign out = (engine_mixed >> 3) + (explo >> 3) + (shell >> 3);
+
+
+  wire [15:0] bang;
+
+  bang_sound bang_sound (
+   .clk(clk),
+   .clk_en_48KHz(clk_en_48KHz),
+   .crsh(crsh),
+   .out(bang)
+   );
+
+  always @(posedge clk) begin
+    if(clk_3MHz_en)begin
+      if (mod_redbaron) begin
+        out <= (engine_mixed >> 3) + (explo >> 3) + (shell >> 3);
+      end else begin
+        out <= (engine_mixed >> 3) + (explo >> 3) + (shell >> 3);
+      end
+    end
+  end
   
 endmodule

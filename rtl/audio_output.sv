@@ -4,6 +4,7 @@ module audio_output
    input clk,
    input clk_3MHz_en,
    input clk_12KHz_en,
+   input clk_48KHz_en,
    input mod_redbaron,
    input[3:0] pokey_audio,
    input[7:0] output_latch, // output_latch[6] is unused, it is the start_led
@@ -22,6 +23,7 @@ module audio_output
      .clk(clk),
      .clk_3MHz_en(clk_3MHz_en),
      .clk_12KHz_en(clk_12KHz_en),
+     .clk_48KHz_en(clk_48KHz_en),
      .mod_redbaron(mod_redbaron),
      .sound_enable(sound_enable),
      .motor_en(output_latch[7]),
@@ -30,6 +32,7 @@ module audio_output
      .shell_en(output_latch[2]),
      .explo_ls(output_latch[1]),
      .explo_en(output_latch[0]),
+     .crsh(output_latch[7:4]),
      .out(analog_audio)
      );
 
@@ -44,7 +47,7 @@ module audio_output
   always @(posedge clk) begin
     if (clk_3MHz_en) begin
       if(rst || !sound_enable)begin
-	      out <= 0;
+	      out <= 2**15;
       end else begin
       	mix_sound();
       end

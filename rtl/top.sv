@@ -154,7 +154,7 @@ assign clk=clk_i;
       logic [4:0] counter3MHz;
       logic [14:0] counter3KHz;
       logic [12:0] counter12KHz;
-      logic [12:0] counter48KHz;
+      logic [10:0] counter48KHz;
 
       initial begin
         counter3MHz = 'd16;
@@ -480,6 +480,7 @@ wire prog_rom_cs = dl_addr < 'h4000;
      .clk_3MHz(clk_3MHz),
      .clk_3MHz_en(clk_3MHz_en),
      .clk_12KHz_en(clk_12KHz_en),
+     .clk_48KHz_en(clk_48KHz_en),
      .mod_redbaron(mod_redbaron),
      .should_read(weEnBram[`BRAM_POKEY]), 
      .buttons(buttons),
