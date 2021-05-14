@@ -3,7 +3,7 @@ module bang_sound
    input clk,
    input clk_en_48KHz,
    input[3:0] crsh,
-   output logic[15:0] out
+   output logic[16:0] out
    );
 
   localparam longint double_cos_omega_32 = 8589026053;
@@ -33,10 +33,11 @@ module bang_sound
       end
       // end
 
-      if(current_sample_12 < -(2**24)) begin //30208 = (2^15) - 5*2^9
-        out <= (-(2**12)) + 2^15;
+      //TODO, not sure of this limit, in the circuit it's -5 volts from the middle of the sinusoid.
+      if(current_sample_12 < -(2**24)) begin
+        out <= 2**15 - 2**12;
       end else begin
-        out <= (current_sample_12 >>> 12) + 2^15;
+        out <= (current_sample_12 >>> 12) + 2**15;
       end
     end
   end

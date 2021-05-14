@@ -3,7 +3,7 @@ module bang_sound_tb;
   logic rst = 0;
   logic clk;
   logic engine_rev_en;
-  int  out;
+  wire[15:0]  out;
 
   logic clk_en = 1;
   logic [3:0] crsh = 10;
