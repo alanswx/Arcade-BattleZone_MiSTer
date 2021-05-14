@@ -49,18 +49,30 @@ module analog_sound
 
 
   wire [15:0] bang;
+  wire [15:0] shot;
+  wire [15:0] squeal;
 
-  bang_sound bang_sound (
+  wire rnoise;
+  assign shot = {16{rnoise}};
+
+  noise_shifters_red_baron noise_shifters_red_baron(
+   .rst(rst),
+   .clk(clk),
+   .clk_12KHz_en(clk_12KHz_en),
+   .rnoise(rnoise)
+  );
+
+  bang_sound bang_sound(
    .clk(clk),
    .clk_en_48KHz(clk_en_48KHz),
-   .crsh(crsh),
+   .crsh(crsh && {4{rnoise}}),
    .out(bang)
    );
 
   always @(posedge clk) begin
     if(clk_3MHz_en)begin
       if (mod_redbaron) begin
-        out <= (engine_mixed >> 3) + (explo >> 3) + (shell >> 3);
+        out <= (bang >> 3) + (shot >> 3) + (squeal >> 3);
       end else begin
         out <= (engine_mixed >> 3) + (explo >> 3) + (shell >> 3);
       end
