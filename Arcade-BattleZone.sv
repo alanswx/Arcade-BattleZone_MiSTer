@@ -322,6 +322,8 @@ top bzonetop(
 .dl_addr(ioctl_addr),
 .dl_data(ioctl_dout),
 .dl_wr(ioctl_wr & !ioctl_index),
+.ioctl_wr(ioctl_wr),
+.ioctl_index(ioctl_index),
 .mod_bradley(mod==mod_bradley),
 .mod_redbaron(mod==mod_redbaron),
 .mod_battlezone(mod==mod_battlezone)

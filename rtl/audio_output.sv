@@ -6,6 +6,10 @@ module audio_output
    input clk_12KHz_en,
    input clk_48KHz_en,
    input mod_redbaron,
+   input[24:0] dl_addr,
+   input[7:0] dl_data,
+   input ioctl_wr,
+   input ioctl_index,
    input[3:0] pokey_audio,
    input[7:0] output_latch, // output_latch[6] is unused, it is the start_led
    output shortint out
@@ -25,6 +29,10 @@ module audio_output
      .clk_12KHz_en(clk_12KHz_en),
      .clk_48KHz_en(clk_48KHz_en),
      .mod_redbaron(mod_redbaron),
+     .dl_addr(dl_addr),
+     .dl_data(dl_data),
+     .ioctl_wr(ioctl_wr),
+     .ioctl_index(ioctl_index),
      .sound_enable(sound_enable),
      .motor_en(output_latch[7]),
      .engine_rev_en(output_latch[4]),
