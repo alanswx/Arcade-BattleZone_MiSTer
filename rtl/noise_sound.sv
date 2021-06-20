@@ -15,7 +15,8 @@ module noise_sound
   
   ls74 ls74_top
     (
-     .clk(clk_en),
+     .clk(clk),
+     .clk_en(clk_en),
      .D(noise),
      .q(),
      .q_(noise)

@@ -59,6 +59,8 @@ source sys/sys.tcl
 source sys/sys_analog.tcl
 source files.qip
 
+set_global_assignment -name SYSTEMVERILOG_FILE rtl/bang_sound.sv
+set_global_assignment -name SYSTEMVERILOG_FILE rtl/noise_shifters_red_baron.sv
 set_global_assignment -name SYSTEMVERILOG_FILE rtl/noise_shifters.sv
 set_global_assignment -name SYSTEMVERILOG_FILE rtl/noise_sound.sv
 set_global_assignment -name SYSTEMVERILOG_FILE rtl/ls164.sv

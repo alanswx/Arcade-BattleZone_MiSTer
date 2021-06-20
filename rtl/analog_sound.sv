@@ -82,20 +82,20 @@ module analog_sound
   wire   [16:0]rom_d;
 
 
-  wave_sound wave_sound
-  (
-    .I_CLK(clk),
-    .I_CLK_SPEED('d24000000),
-    .I_RSTn(explo_ls),
-    .I_H_CNT(hcnt[3:0]), // used to interleave data reads
-    .I_DMA_TRIG(explo_ls),
-    .I_DMA_STOP(~explo_ls),
-    .I_DMA_CHAN(3'b1), // 8 channels
-    .I_DMA_ADDR(16'b0),
-    .I_DMA_DATA(rom_a), // Data coming back from wave ROM
-    .O_DMA_ADDR(rom_d), // output address to wave ROM
-    .O_SND(squeal)
-  );
+  // wave_sound wave_sound
+  // (
+  //   .I_CLK(clk),
+  //   .I_CLK_SPEED('d24000000),
+  //   .I_RSTn(explo_ls),
+  //   .I_H_CNT(hcnt[3:0]), // used to interleave data reads
+  //   .I_DMA_TRIG(explo_ls),
+  //   .I_DMA_STOP(~explo_ls),
+  //   .I_DMA_CHAN(3'b1), // 8 channels
+  //   .I_DMA_ADDR(16'b0),
+  //   .I_DMA_DATA(rom_a), // Data coming back from wave ROM
+  //   .O_DMA_ADDR(rom_d), // output address to wave ROM
+  //   .O_SND(squeal)
+  // );
 
   bang_sound bang_sound(
    .clk(clk),
