@@ -19,7 +19,7 @@ module analog_sound
    input explo_en,
    input[3:0] crsh,
    input[15:0] ioctl_addr,
-   output shortint out
+   output logic[15:0] out
    );
 
 
@@ -54,11 +54,9 @@ module analog_sound
 
 
   wire [15:0] bang;
-  wire [15:0] shot;
   wire [15:0] squeal;
 
   wire rnoise;
-  assign shot = {16{rnoise && shell_en}};
 
   noise_shifters_red_baron noise_shifters_red_baron(
    .rst(rst),
@@ -67,16 +65,16 @@ module analog_sound
    .rnoise(rnoise)
   );
 
-  dpram #(16,8) rom
-  (
-    .clock_a(clk),
-    .wren_a(ioctl_wr && ioctl_index == 2),
-    .address_a(dl_addr[15:0]),
-    .data_a(dl_data),// TODO +4096?
-    .clock_b(clk),
-    .address_b(rom_a),
-    .q_b(rom_d)
-  );
+  // dpram #(16,8) rom
+  // (
+  //   .clock_a(clk),
+  //   .wren_a(ioctl_wr && ioctl_index == 2),
+  //   .address_a(dl_addr[15:0]),
+  //   .data_a(dl_data),// TODO +4096?
+  //   .clock_b(clk),
+  //   .address_b(rom_a),
+  //   .q_b(rom_d)
+  // );
 
   reg    [15:0]rom_a;
   wire   [16:0]rom_d;
@@ -99,19 +97,29 @@ module analog_sound
 
   bang_sound bang_sound(
    .clk(clk),
-   .clk_en_48KHz(clk_en_48KHz),
-   .crsh(crsh && {4{rnoise}}),
+   .clk_48KHz_en(clk_48KHz_en),
+   .crsh((crsh & {4{rnoise}})),
    .out(bang)
    );
 
+  wire [15:0] shot_filtered;
+  iir #(8,16) iir_shot
+    (
+     .clk(clk),
+     .clk_3MHz_en(clk_3MHz_en),
+     .in({{2{'0}}, {14{(rnoise && shell_en)}}}),
+     .out(shot_filtered)
+     );
+
+  
   always @(posedge clk) begin
     if(clk_3MHz_en)begin
       if (mod_redbaron) begin
-        out <= (bang >> 3) + (shot >> 3) + ((squeal && explo_ls)>> 3);
+        out <= (bang >> 2) + (shot_filtered >> 2);
       end else begin
-        out <= (engine_mixed >> 3) + (explo >> 3) + (shell >> 3);
+        out <= (engine_mixed >> 2) + (explo >> 2) + (shell >> 2);
       end
-    end
+    end 
   end
   
 endmodule

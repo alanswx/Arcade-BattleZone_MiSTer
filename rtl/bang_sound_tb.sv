@@ -10,7 +10,7 @@ module bang_sound_tb;
 
   bang_sound bang_sound (
    .clk(clk),
-   .clk_en_48KHz('1),
+   .clk_48KHz_en('1),
    .crsh(crsh),
    .out(out)
    );

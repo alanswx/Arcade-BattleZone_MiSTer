@@ -10,8 +10,8 @@ module noise_shifters_red_baron
   wire[7:0] Q_left;
   wire[7:0] Q_right;
 
-  assign ab_left = !Q_right[1] ^ Q_left[7];
-  assign rnoise = Q_right[0];
+  assign ab_left = !Q_right[6] ^ Q_left[0];
+  assign rnoise = Q_right[7];
 
   ls164 ls164_left
     (
@@ -28,8 +28,8 @@ module noise_shifters_red_baron
      .rst(rst),
      .clk(clk),
      .clk_en(clk_12KHz_en),
-     .a(Q_left[0]),
-     .b(Q_left[0]),
+     .a(Q_left[7]),
+     .b(Q_left[7]),
      .Q(Q_right)
      );
 
