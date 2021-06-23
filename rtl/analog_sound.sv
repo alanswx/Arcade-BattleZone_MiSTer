@@ -103,7 +103,7 @@ module analog_sound
    );
 
   wire [15:0] shot_filtered;
-  iir #(8,16) iir_shot
+  iir #(10,16) iir_shot
     (
      .clk(clk),
      .clk_3MHz_en(clk_3MHz_en),
@@ -115,7 +115,7 @@ module analog_sound
   always @(posedge clk) begin
     if(clk_3MHz_en)begin
       if (mod_redbaron) begin
-        out <= (bang >> 2) + (shot_filtered >> 2);
+        out <= (bang >> 1) + (shot_filtered >> 2);
       end else begin
         out <= (engine_mixed >> 2) + (explo >> 2) + (shell >> 2);
       end

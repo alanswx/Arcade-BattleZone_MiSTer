@@ -6,9 +6,9 @@ module bang_sound
    output logic[15:0] out = 0
    );
 
-  logic signed[46:0] double_cos_omega_14 = 8589026053 >> 18;
+  logic signed[46:0] double_cos_omega_14 = 32765;
   // dampening_per_wave = 1 / 1.3
-  logic signed[45:0] dampening_ratio_per_sample_14 = 4292359648 >> 18; // (dampening_per_wave**(1/samples_per_wave_length))**6
+  logic signed[45:0] dampening_ratio_per_sample_14 = 16374;  // (dampening_per_wave**(1/samples_per_wave_length))**6
   
   logic signed[27:0] current_sample_12 = 0;
   logic signed[27:0] last_sample_12 = 0;
