@@ -6,9 +6,13 @@ module bang_sound
    output logic[15:0] out = 0
    );
 
-  logic signed[46:0] double_cos_omega_14 = 32765;
+  // localparam longint double_cos_omega_32 = 8589026053;
+  // // dampening_per_wave = 1 / 1.3
+  // localparam longint dampening_ratio_per_sample_32 = 4292359648; 
+
+  logic signed[48:0] double_cos_omega_20 = 2096930;
   // dampening_per_wave = 1 / 1.3
-  logic signed[45:0] dampening_ratio_per_sample_14 = 16374;  // (dampening_per_wave**(1/samples_per_wave_length))**6
+  logic signed[47:0] dampening_ratio_per_sample_20 = 1047939;  // (dampening_per_wave**(1/samples_per_wave_length))**6
   
   logic signed[27:0] current_sample_12 = 0;
   logic signed[27:0] last_sample_12 = 0;
@@ -33,7 +37,7 @@ module bang_sound
     end
     if(step)begin
       casex (step)
-        1: last_sample_12 <= dampen(current_sample_12);
+        1: last_sample_12 <= current_sample_12;
         2: current_sample_12 <= change + continue_sine();
         3: current_sample_12 <= dampen(current_sample_12);
       endcase
@@ -43,10 +47,10 @@ module bang_sound
   end
 
   function logic signed[27:0] continue_sine;
-    return ((double_cos_omega_14*last_sample_12) >>> 14)-pre_last_sample_12;
+    return ((double_cos_omega_20*last_sample_12) >>> 20)-pre_last_sample_12;
   endfunction
 
   function logic signed[27:0] dampen(logic signed[27:0] sample);
-    return (sample*dampening_ratio_per_sample_14) >>> 14;
+    return (sample*dampening_ratio_per_sample_20) >>> 20;
   endfunction
 endmodule
