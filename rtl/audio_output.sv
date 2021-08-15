@@ -48,7 +48,7 @@ module audio_output
     (
      .clk(clk),
      .clk_3MHz_en(clk_3MHz_en),
-     .in({{3'b0}, {pokey_audio}, {9'b0}}),
+     .in({{2'b0}, {pokey_audio}, {10'b0}}),
      .out(pokey_filtered)
      );
 
@@ -72,7 +72,7 @@ module audio_output
   end
 
   task mix_sound;
-    out_unfiltered <= (pokey_filtered >> 1) + (analog_audio >> 1);
+    out_unfiltered <= pokey_filtered + analog_audio;
   endtask
   
 endmodule

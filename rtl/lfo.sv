@@ -11,7 +11,7 @@ module lfo
   // should be something between a triangle and a sine/saw
   // right now this is just a triangle
   // could be solve by using a square wave(i.e. engine_rev_en directly) with a low pass.
-  logic[13:0] counter = 0;
+  logic[14:0] counter = 0;
   always @(posedge clk) begin  
     if (rst) begin;
       out <= 0;

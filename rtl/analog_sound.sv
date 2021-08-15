@@ -83,7 +83,7 @@ module analog_sound(
       if (mod_redbaron) begin
         out <= (bang >> 1) + (shot_filtered >> 2);
       end else begin
-        out <= (engine_mixed >> 2) + (explo >> 2) + (shell >> 2);
+        out <= (engine_mixed >> 1) + (explo >> 1) + (shell >> 1);
       end
     end 
   end
