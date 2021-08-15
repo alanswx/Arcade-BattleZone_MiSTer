@@ -23,7 +23,8 @@ module bang_sound
   logic signed[21:0] change = 0;
 
   logic[1:0] step = 0;
-  always @(posedge clk)begin
+  
+  always_ff @(posedge clk)begin
     if(clk_48KHz_en)begin
       step <= 1;
       change <= (last_crsh - crsh) <<< 17;
@@ -46,11 +47,11 @@ module bang_sound
     
   end
 
-  function logic signed[27:0] continue_sine;
+  function automatic logic signed[27:0] continue_sine();
     return ((double_cos_omega_20*last_sample_12) >>> 20)-pre_last_sample_12;
   endfunction
 
-  function logic signed[27:0] dampen(logic signed[27:0] sample);
+  function  automatic logic signed[27:0] dampen(logic signed[27:0] sample);
     return (sample*dampening_ratio_per_sample_20) >>> 20;
   endfunction
 endmodule
