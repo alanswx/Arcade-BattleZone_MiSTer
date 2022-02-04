@@ -47,7 +47,8 @@ module top
    input wire         ioctl_index,
    input wire mod_bradley,
    input wire mod_redbaron,
-   input wire mod_battlezone
+   input wir mod_battlezone,
+   SdramSamplePlayerInterace sdramSamplePlayerBus
    );
 
 
@@ -105,15 +106,6 @@ module top
 
   logic              locked;
 
-/*  main_clock clocks
-    (
-     .clk_out1  (clk),
-     //.reset(rst),
-     .reset     (1'b0),
-     .locked    (locked),
-     .clk_in1   (clk_i)
-     );
-	  */
 assign clk=clk_i;
 
   generate
@@ -233,7 +225,7 @@ assign clk=clk_i;
 	  .mod_redbaron   (mod_redbaron)
      );
 
-wire prog_rom_cs = dl_addr < 'h4000;
+  wire prog_rom_cs = dl_addr < 'h4000;
 
   dpram #(.addr_width_g(14),.data_width_g(8)) progRom (
 	.clock_a(clk),
@@ -246,25 +238,7 @@ wire prog_rom_cs = dl_addr < 'h4000;
 	.address_b(prog_rom_addr[13:0]),
 	.q_b(dataFromBram[`BRAM_PROG_ROM])
 	);
-/*	
-  prog_rom progRom
-    (
-     .addr        (prog_rom_addr[13:0]),
-     .clk         (clk),
-     .clk_en      (clk_3MHz_en),
-     .dout        (dataFromBram[`BRAM_PROG_ROM])
-     );
-	*/
-	
-  /*
-  prog progRom
-  (
-	  .addr        (prog_rom_addr[13:0]),
-     .clk         (clk),
-     //.clk_en      (clk_3MHz_en),
-     .data        (dataFromBram[`BRAM_PROG_ROM])
-	);
-*/
+
   sp_ram
     #
     (
@@ -297,18 +271,7 @@ wire prog_rom_cs = dl_addr < 'h4000;
 	.data_b(dataToBram[`BRAM_VECTOR]),
 	.q_b(dataFromBram[`BRAM_VECTOR])
 	);
-/*	  
-  (* ram_style = "block" *) logic [7:0] vecram2_store[8192];
-  initial begin
-    $readmemh("avg_clean2.mem", vecram2_store, 0, 8191);
-  end
-  always @(posedge clk) begin
-    if (clk_3MHz_en) begin
-      if (weEnBram[`BRAM_VECTOR]) vecram2_store[addrToBram[`BRAM_VECTOR][12:0]] <= dataToBram[`BRAM_VECTOR];
-      dataFromBram[`BRAM_VECTOR] <= vecram2_store[addrToBram[`BRAM_VECTOR][12:0]];
-    end
-  end
-*/
+
   logic [15:0] vec_ram_write_addr;
   logic [15:0] vec_ram_read_addr;
 
@@ -324,9 +287,7 @@ wire prog_rom_cs = dl_addr < 'h4000;
   
   (* ram_style = "block" *) logic [7:0] vecram_store[8192];
   logic [15:0] inst_pipe; // Original implementation had a pipe stage
-  //initial begin
-  //  $readmemh("avg_clean2.mem", vecram_store, 0, 8191);
-  //end
+  
   always @(posedge clk) begin
     if (vecram_we) begin
       vecram_store[vecram_addr] <= vecram_data;
@@ -457,7 +418,7 @@ wire prog_rom_cs = dl_addr < 'h4000;
      .clk            (clk),
      .clk_en         (clk_3MHz_en),
      .rst            (rst),
-	  .mod_redbaron   (mod_redbaron),
+	   .mod_redbaron   (mod_redbaron),
      .dataOut        (dataFromBram[`BRAM_MATH])
      );
 
@@ -494,7 +455,8 @@ wire prog_rom_cs = dl_addr < 'h4000;
      .data_to_bram(dataToBram[`BRAM_POKEY]),
      .audiosel(audiosel),
      .data_from_bram(dataFromBram[`BRAM_POKEY]),
-     .audio(audio)
+     .audio(audio),
+     .sdramSamplePlayerBus(sdramSamplePlayerBus)
      );
 
 endmodule
