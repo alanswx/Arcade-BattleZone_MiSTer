@@ -6,7 +6,7 @@ interface SdramSamplePlayerInterface(
 	input[24:0] ioctl_addr,
 	input[7:0] ioctl_index,
 	input[15:0] SDRAM_DQ,
-	input play_squeel,
+	inout play_squeel,
 	output[7:0] ioctl_dout,
 	output SDRAM_CLK,
 	output SDRAM_CKE,
@@ -147,7 +147,7 @@ wire [27:0] wav_addr;
 wire  [7:0] wav_data = s_dout[(wav_addr[2:0]*8) +:8];
 wire        wav_rd;
 
-wave_sound #(40000000) wave_sound
+wave_sound #(50000000) wave_sound
 (
 	.I_CLK(clk_sys),
 	.I_RST(~bus.play_squeel | ~wav_loaded),

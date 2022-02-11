@@ -47,8 +47,8 @@ module top
    input wire         ioctl_index,
    input wire mod_bradley,
    input wire mod_redbaron,
-   input wir mod_battlezone,
-   SdramSamplePlayerInterace sdramSamplePlayerBus
+   input wire mod_battlezone,
+   SdramSamplePlayerInterface sdramSamplePlayerBus
    );
 
 

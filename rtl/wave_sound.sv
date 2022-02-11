@@ -7,7 +7,7 @@
 //
 //============================================================================
 
-module wave_sound #(parameter SYSCLOCK = 40000000)
+module wave_sound #(parameter SYSCLOCK = 50000000)
 (
 	input         I_CLK,
 	input         I_RST,

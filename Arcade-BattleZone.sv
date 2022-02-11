@@ -312,7 +312,7 @@ wire reset = (RESET | status[0] | buttons[1] | ioctl_download);
 assign AUDIO_R = AUDIO_L;
 assign AUDIO_S = 0;
 
-SdramSamplePlayerInterfce sdramSamplePlayerBus(
+SdramSamplePlayerInterface sdramSamplePlayerBus(
   .pll_locked(pll_locked),
   .clk_sys(clk_50),
   .ioctl_download(ioctl_download),
