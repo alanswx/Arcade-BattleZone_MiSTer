@@ -18,16 +18,17 @@ module analog_sound(
   input explo_en,
   input[3:0] crsh,
   input[15:0] ioctl_addr,
-  output logic[15:0] out,
-  SdramSamplePlayerInterface sdramSamplePlayerBus
+  output logic[15:0] out
+  //output logic[15:0] out,
+  //SdramSamplePlayerInterface sdramSamplePlayerBus
 );
 
-  sdram_sample_player sdram_sample_player(
-    .bus(sdramSamplePlayerBus)
-  );
+  //sdram_sample_player sdram_sample_player(
+  //  .bus(sdramSamplePlayerBus)
+  //);
 
   wire[15:0] explo,shell;
-  assign sdramSamplePlayerBus.play_squeel = explo_ls;
+  //assign sdramSamplePlayerBus.play_squeel = explo_ls;
 
   noise_source_shell_explo noise_source_shell_explo(
     .clk(clk),
@@ -86,7 +87,8 @@ module analog_sound(
   always @(posedge clk) begin
     if(clk_3MHz_en)begin
       if (mod_redbaron) begin
-        out <= (bang >> 1) + (shot_filtered >> 2) + (sdramSamplePlayerBus.audio_out >> 2);
+        out <= (bang >> 1) + (shot_filtered >> 2);
+        //out <= (bang >> 1) + (shot_filtered >> 2) + (sdramSamplePlayerBus.audio_out >> 2);
       end else begin
         out <= (engine_mixed >> 1) + (explo >> 1) + (shell >> 1);
       end

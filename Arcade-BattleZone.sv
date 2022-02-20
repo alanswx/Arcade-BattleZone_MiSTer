@@ -93,17 +93,17 @@ module emu
 	output        AUDIO_S,   // 1 - signed audio samples, 0 - unsigned
 	
 	//SDRAM interface with lower latency
-	output        SDRAM_CLK,
-	output        SDRAM_CKE,
-	output [12:0] SDRAM_A,
-	output  [1:0] SDRAM_BA,
-	inout  [15:0] SDRAM_DQ,
-	output        SDRAM_DQML,
-	output        SDRAM_DQMH,
-	output        SDRAM_nCS,
-	output        SDRAM_nCAS,
-	output        SDRAM_nRAS,
-	output        SDRAM_nWE, 
+	//output        SDRAM_CLK,
+	//output        SDRAM_CKE,
+	//output [12:0] SDRAM_A,
+	//output  [1:0] SDRAM_BA,
+	//inout  [15:0] SDRAM_DQ,
+	//output        SDRAM_DQML,
+	//output        SDRAM_DQMH,
+	//output        SDRAM_nCS,
+	//output        SDRAM_nCAS,
+	//output        SDRAM_nRAS,
+	//output        SDRAM_nWE, 
 	// Open-drain User port.
 	// 0 - D+/RX
 	// 1 - D-/TX
@@ -312,26 +312,26 @@ wire reset = (RESET | status[0] | buttons[1] | ioctl_download);
 assign AUDIO_R = AUDIO_L;
 assign AUDIO_S = 0;
 
-SdramSamplePlayerInterface sdramSamplePlayerBus(
-  .pll_locked(pll_locked),
-  .clk_sys(clk_50),
-  .ioctl_download(ioctl_download),
-  .ioctl_wr(ioctl_wr),
-  .ioctl_addr(ioctl_addr),
-  .ioctl_index(ioctl_index),
-  .ioctl_dout(ioctl_dout),
-  .SDRAM_CLK(SDRAM_CLK),
-  .SDRAM_CKE(SDRAM_CKE),
-  .SDRAM_A(SDRAM_A),
-  .SDRAM_BA(SDRAM_BA),
-  .SDRAM_DQML(SDRAM_DQML),
-  .SDRAM_DQMH(SDRAM_DQMH),
-  .SDRAM_nCS(SDRAM_nCS),
-  .SDRAM_nCAS(SDRAM_nCAS),
-  .SDRAM_nRAS(SDRAM_nRAS),
-  .SDRAM_nWE(SDRAM_nWE),
-  .SDRAM_DQ(SDRAM_DQ)
-);
+// SdramSamplePlayerInterface sdramSamplePlayerBus(
+//   .pll_locked(pll_locked),
+//   .clk_sys(clk_50),
+//   .ioctl_download(ioctl_download),
+//   .ioctl_wr(ioctl_wr),
+//   .ioctl_addr(ioctl_addr),
+//   .ioctl_index(ioctl_index),
+//   .ioctl_dout(ioctl_dout),
+//   .SDRAM_CLK(SDRAM_CLK),
+//   .SDRAM_CKE(SDRAM_CKE),
+//   .SDRAM_A(SDRAM_A),
+//   .SDRAM_BA(SDRAM_BA),
+//   .SDRAM_DQML(SDRAM_DQML),
+//   .SDRAM_DQMH(SDRAM_DQMH),
+//   .SDRAM_nCS(SDRAM_nCS),
+//   .SDRAM_nCAS(SDRAM_nCAS),
+//   .SDRAM_nRAS(SDRAM_nRAS),
+//   .SDRAM_nWE(SDRAM_nWE),
+//   .SDRAM_DQ(SDRAM_DQ)
+// );
 
 top bzonetop(
   .clk_i(clk_50),
@@ -359,8 +359,9 @@ top bzonetop(
   .ioctl_index(ioctl_index),
   .mod_bradley(mod==mod_bradley),
   .mod_redbaron(mod==mod_redbaron),
-  .mod_battlezone(mod==mod_battlezone),
-  .sdramSamplePlayerBus(sdramSamplePlayerBus)
+  .mod_battlezone(mod==mod_battlezone)
+//   .mod_battlezone(mod==mod_battlezone),
+//   .sdramSamplePlayerBus(sdramSamplePlayerBus)
 );
 
 
