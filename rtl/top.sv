@@ -43,8 +43,6 @@ module top
    input wire [24:0]  dl_addr,
    input wire [7:0]   dl_data,
    input wire         dl_wr,
-   input wire         ioctl_wr,
-   input wire         ioctl_index,
    input wire mod_bradley,
    input wire mod_redbaron,
    input wire mod_battlezone
@@ -447,8 +445,6 @@ assign clk=clk_i;
      .clk_48KHz_en(clk_48KHz_en),
      .dl_addr(dl_addr),
      .dl_data(dl_data),
-     .ioctl_wr(ioctl_wr),
-     .ioctl_index(ioctl_index),
      .mod_redbaron(mod_redbaron),
      .should_read(weEnBram[`BRAM_POKEY]), 
      .buttons(buttons),

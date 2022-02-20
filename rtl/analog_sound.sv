@@ -5,8 +5,6 @@ module analog_sound(
   input clk_12KHz_en,
   input clk_48KHz_en,
   input mod_redbaron,
-  input ioctl_wr,
-  input ioctl_index,
   input[24:0] dl_addr,
   input[7:0] dl_data,
   input sound_enable,

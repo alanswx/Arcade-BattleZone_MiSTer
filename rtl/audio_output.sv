@@ -33,8 +33,6 @@ module audio_output
      .mod_redbaron(mod_redbaron),
      .dl_addr(dl_addr),
      .dl_data(dl_data),
-     .ioctl_wr(ioctl_wr),
-     .ioctl_index(ioctl_index),
      .sound_enable(sound_enable),
      .motor_en(output_latch[7]),
      .engine_rev_en(output_latch[4]),

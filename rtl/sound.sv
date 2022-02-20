@@ -75,7 +75,6 @@ module sound
      .clk_48KHz_en(clk_48KHz_en),
      .dl_addr(dl_addr),
      .dl_data(dl_data),
-     .ioctl_wr(ioctl_wr),
      .mod_redbaron(mod_redbaron),
      .pokey_audio(pokey_audio),
      .output_latch(outputLatch),
