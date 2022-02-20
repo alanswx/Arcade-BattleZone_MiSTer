@@ -16,17 +16,14 @@ module sound
    input mod_redbaron,
    input[24:0] dl_addr,
    input[7:0] dl_data,
-   input ioctl_wr,
-   input ioctl_index,
    input should_read, 
    input[7:0] buttons,
    input[15:0] addr_to_bram, 
    input[7:0] data_to_bram,
    output audiosel,
    output[7:0] data_from_bram,
-   output[15:0] audio
-  //  output[15:0] audio,
-  //  SdramSamplePlayerInterface sdramSamplePlayerBus
+   output[15:0] audio,
+   SdramSamplePlayerInterface sdramSamplePlayerBus
    );
   
   logic pokeyEn;
@@ -78,9 +75,8 @@ module sound
      .mod_redbaron(mod_redbaron),
      .pokey_audio(pokey_audio),
      .output_latch(outputLatch),
-     .out(audio)
-    //  .out(audio),
-    //  .sdramSamplePlayerBus(sdramSamplePlayerBus)
+     .out(audio),
+     .sdramSamplePlayerBus(sdramSamplePlayerBus)
      );
 
 endmodule
