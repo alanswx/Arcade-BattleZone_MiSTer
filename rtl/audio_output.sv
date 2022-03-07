@@ -10,8 +10,7 @@ module audio_output
    input[7:0] dl_data,
    input[3:0] pokey_audio,
    input[7:0] output_latch, // output_latch[6] is unused, it is the start_led
-   output logic[15:0] out,
-   SdramSamplePlayerInterface sdramSamplePlayerBus
+   output logic[15:0] out
    );
 
   wire[15:0] pokey_filtered;
@@ -38,8 +37,7 @@ module audio_output
      .explo_ls(output_latch[1]),
      .explo_en(output_latch[0]),
      .crsh({output_latch[7], output_latch[6], output_latch[5], output_latch[4]}),
-     .out(analog_audio),
-     .sdramSamplePlayerBus(sdramSamplePlayerBus)
+     .out(analog_audio)
      );
 
   iir #(6,16) iir_pokey // FIXME: calculate the needed depth of this filter, and do there need to be multiple iirs stacked?

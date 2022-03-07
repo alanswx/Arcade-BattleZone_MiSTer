@@ -45,8 +45,7 @@ module top
    input wire         dl_wr,
    input wire mod_bradley,
    input wire mod_redbaron,
-   input wire mod_battlezone,
-   SdramSamplePlayerInterface sdramSamplePlayerBus
+   input wire mod_battlezone
    );
 
 
@@ -451,8 +450,7 @@ assign clk=clk_i;
      .data_to_bram(dataToBram[`BRAM_POKEY]),
      .audiosel(audiosel),
      .data_from_bram(dataFromBram[`BRAM_POKEY]),
-     .audio(audio),
-     .sdramSamplePlayerBus(sdramSamplePlayerBus)
+     .audio(audio)
      );
 
 endmodule
