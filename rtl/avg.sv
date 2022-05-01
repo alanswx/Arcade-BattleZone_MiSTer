@@ -68,7 +68,7 @@ module avg_core
   end
 
   assign run = (countOut == 1 && ~halt);
-  assign countIn = (countOut == 0 ? instLength : countOut - 1);
+  assign countIn = (countOut == 0 ? instLength : countOut - 3'b1);
 
   always_ff @(posedge clk_in) begin
     if(rst_in)  rst <= 1;
@@ -80,7 +80,7 @@ module avg_core
       clkCount <= 0;
     end
     else begin
-      clkCount <= clkCount + 1;
+      clkCount <= clkCount + 3'b1;
       if(vggo) vggoCap <= 1;
       else if(clk_edge) vggoCap <= 0; //DEMO: changed to else if, and == 0
     end

@@ -125,10 +125,10 @@ assign clk=clk_i;
           counter12KHz <= 'd2048;
           counter48KHz <= 'd512;
         end else begin
-          counter3MHz <= counter3MHz + 'd1;
-          counter3KHz <= counter3KHz + 'd1;
-          counter12KHz <= counter12KHz + 'd1;
-          counter48KHz <= counter48KHz + 'd1;
+          counter3MHz <= counter3MHz + 4'd1;
+          counter3KHz <= counter3KHz + 14'd1;
+          counter12KHz <= counter12KHz + 12'd1;
+          counter48KHz <= counter48KHz + 10'd1;
         end
       end
 

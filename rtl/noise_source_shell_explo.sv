@@ -12,7 +12,7 @@ module noise_source_shell_explo
    output[15:0] noise_shell
    );
 
-  // logic explo,shell;
+   logic explo,shell;
   // logic explo_clk_en, shell_clk_en;
 
   noise_shifters noise_shifters

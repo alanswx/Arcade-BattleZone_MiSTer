@@ -73,7 +73,7 @@ module analog_sound(
     .out(shot_filtered)
   );
 
-  SquealSound squeal_player(
+   SquealSound squeal_player(
    .clk(clk),
    .clk_48KHz_en(clk_48KHz_en),
    .play(explo_ls),
