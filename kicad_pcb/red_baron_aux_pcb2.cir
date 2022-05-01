@@ -1,0 +1,18 @@
+.title KiCad schematic
+U13 Net-_R29-Pad2_ Net-_C30-Pad1_ Net-_R29-Pad1_ NC_01 NC_02 OPAMP
+R29 Net-_R29-Pad1_ Net-_R29-Pad2_ 100k
+R30 Net-_R29-Pad2_ Net-_C15-Pad1_ 27k
+C15 Net-_C15-Pad1_ Net-_C15-Pad2_ .22
+R9 Net-_C15-Pad2_ Net-_C21-Pad1_ 10k
+C30 Net-_C30-Pad1_ Earth 10
+C31 Net-_C30-Pad1_ Earth .1
+R1 Net-_C30-Pad1_ Net-_5V1-Pad1_ R_US
+V5V1 Net-_5V1-Pad1_ Earth dc(1)
+V22V1 Net-_22V1-Pad1_ Earth dc(1)
+K4 Net-_C22-Pad1_ Net-_C30-Pad1_ Net-_C21-Pad1_ Net-_22V1-Pad1_ Earth OPAMP
+C22 Net-_C22-Pad1_ Net-_C21-Pad2_ .1
+C21 Net-_C21-Pad1_ Net-_C21-Pad2_ .1
+R8 Net-_C21-Pad2_ NC_03 5600
+R25 Net-_C21-Pad1_ Net-_C22-Pad1_ 330k
+R24 Net-_C21-Pad2_ GND 680
+.end

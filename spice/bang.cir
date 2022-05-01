@@ -1,0 +1,69 @@
+
+
+.include opamp.cir
+
+a1 %v([crsh7 crsh6 crsh5 crsh4]) crsh_in
+.model crsh_in filesource(file="noise.pwl" amploffset=[0 0 0 0] amplscale=[5 5 5 5] timescale=83.3333333us amplstep=true)
+
+
+v5 5volt 0 dc 5v
+v22 22volt 0 dc 22v
+xstabilize 5volt vref stabilizer
+
+r17 crsh7 noise_in 1k
+r16 crsh6 noise_in 2.2k
+r15 crsh5 noise_in 3.9k
+r14 crsh4 noise_in 8.2k
+
+
+* xstab 5volt vref stabilizer 
+xintegrator noise_in vref 22volt opamp_top_out special_integrator
+
+r9 opamp_top_out 7 10k
+c15 7 8 0.22uf
+r30 8 9 27k
+xk4aud_1 vref 9 22volt 0 audio_1 lm324
+r29 audio_1 9 100k
+raudio_1 audio_1 0 8k
+
+.control
+set filetype=ascii
+option noinit acct
+tran 2.5us 1s
+* print v(noise_in) v(opamp_top_out) v(audio_1)
+plot v(opamp_top_out) v(audio_1)
+wrdata output.txt v(audio_1)
+.endc
+.end
+
+
+.subckt stabilizer power out
+
+R36 power out 22k
+C31 out 0 0.1uf
+C30 out 0 10uf
+
+.ends
+
+.subckt special_integrator signal ref power out
+
+r18 signal 1 5.6k
+r24 1 0 680
+c21 1 out 0.1uf
+c22 1 2 0.1uf
+r25 out 2 330k
+xk4top ref 2 power 0 out lm324
+
+.ends
+
+
+*VN4 N_IN 0 DC 0 TRRANDOM(2 19us 0 )
+*R18 N_IN 1 5.6k 
+*R24 1 0 680
+*C21 1 OPAMP_TOP_OUT 0.1uf
+*C22 1 3 0.1uf
+*R25 OPAMP_TOP_OUT 3 330k
+*XK4TOP OPAMP_POS 3 22VOLT 0 OPAMP_TOP_OUT LM324
+*R36 5VOLT OPAMP_POS 22k
+*C31 OPAMP_POS 0 0.1uf
+*C30 OPAMP_POS 0 10uf

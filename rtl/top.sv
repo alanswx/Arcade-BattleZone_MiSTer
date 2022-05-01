@@ -30,25 +30,23 @@ module top
    input wire         clk_i, btnCpuReset,
    input wire [7:0]   DSW0,
    input wire [7:0]   DSW1,
-	input wire [7:0]   REDBARONBUTTONS,
+   input wire [7:0]   REDBARONBUTTONS,
    input wire [7:0]   JB,
-	input wire [7:0]   buttons,
-	input wire         self_test,
-	output logic [7:0] audiosel,
-   output logic [7:0] JD,
+   input wire [7:0]   buttons,
+   input wire         self_test,
+   output logic audiosel,
    output logic [3:0] vgaRed, vgaBlue, vgaGreen,
    output logic       Hsync, Vsync,
-	output logic       en_r,
-	output logic       hBlank, vBlank,
-	output logic [3:0] audio,
-   output logic       ampPWM, ampSD,
-	input wire [24:0]  dl_addr,
-	input wire [7:0]   dl_data,
-	input wire         dl_wr,
-	input wire mod_bradley,
-	input wire mod_redbaron,
-	input wire mod_battlezone
-	);
+   output logic       en_r,
+   output logic       hBlank, vBlank,
+   output logic [15:0] audio,
+   input wire [24:0]  dl_addr,
+   input wire [7:0]   dl_data,
+   input wire         dl_wr,
+   input wire mod_bradley,
+   input wire mod_redbaron,
+   input wire mod_battlezone
+   );
 
 
   logic [8:0]         row;
@@ -68,6 +66,7 @@ module top
   logic [12:0]        pixelX, pixelY;
   logic               rst_l;
   logic               vggo, vgrst;
+  logic               ampPWM, ampSD;
 
   assign rst = ~rst_l;
   assign readyLine = ~empty;
@@ -91,7 +90,8 @@ module top
   logic              clk_3MHz_en;
   logic              clk_6MHz_en;
   logic              clk_3KHz_en;
-  logic              clk_6KHz_en;
+  logic              clk_12KHz_en;
+  logic              clk_48KHz_en;
 
   logic              coreReset;
 
@@ -103,78 +103,77 @@ module top
 
   logic              locked;
 
-/*  main_clock clocks
-    (
-     .clk_out1  (clk),
-     //.reset(rst),
-     .reset     (1'b0),
-     .locked    (locked),
-     .clk_in1   (clk_i)
-     );
-	  */
 assign clk=clk_i;
 
   generate
     if (CLK_DIV == "TRUE") begin : g_CLK_DIV
       logic [3:0]        counter3MHz;
       logic [13:0]       counter3KHz;
-      logic [12:0]       counter6KHz;
+      logic [11:0]       counter12KHz;
+      logic [9:0]       counter48KHz;
 
       initial begin
         counter3MHz = 'd8;
         counter3KHz = 'd8192;
-        counter6KHz = 'd4096;
+        counter12KHz = 'd2048;
+        counter48KHz = 'd512;
       end
       always @(posedge clk) begin
         if(rst) begin
           counter3MHz <= 'd8;
           counter3KHz <= 'd8192;
-          counter6KHz <= 'd4096;
+          counter12KHz <= 'd2048;
+          counter48KHz <= 'd512;
         end else begin
           counter3MHz <= counter3MHz + 'd1;
           counter3KHz <= counter3KHz + 'd1;
-          counter6KHz <= counter6KHz + 'd1;
+          counter12KHz <= counter12KHz + 'd1;
+          counter48KHz <= counter48KHz + 'd1;
         end
       end
 
       assign clk_3MHz = (counter3MHz > 'd7);
       assign clk_3KHz = (counter3KHz > 'd8191);
-      assign clk_6KHz = (counter6KHz > 'd4096);
       assign clk_3MHz_en = counter3MHz == 'd7;
-      assign clk_6MHz_en = counter3MHz[2:0] == 4'd7;
+      assign clk_6MHz_en = counter3MHz[2:0] == 3'd7;
       assign clk_3KHz_en = counter3KHz == 'd8191;
-      assign clk_6KHz_en = counter6KHz == 'd4096;
+      assign clk_12KHz_en = counter12KHz == 'd2047;
+      assign clk_48KHz_en = counter48KHz == 'd511;
 
     end else begin : g_NO_CLK_DIV
 
       logic [4:0] counter3MHz;
       logic [14:0] counter3KHz;
-      logic [13:0] counter6KHz;
+      logic [12:0] counter12KHz;
+      logic [10:0] counter48KHz;
 
       initial begin
         counter3MHz = 'd16;
         counter3KHz = 'd16384;
-        counter6KHz = 'd8192;
+        counter12KHz = 'd4096;
+        counter48KHz = 'd1024;
       end
       always @(posedge clk) begin
         if(rst) begin
           counter3MHz <= 'd16;
           counter3KHz <= 'd16384;
-          counter6KHz <= 'd8192;
+          counter12KHz <= 'd4096;
+          counter12KHz <= 'd1024;
         end else begin
           counter3MHz <= counter3MHz + 'd1;
           counter3KHz <= counter3KHz + 'd1;
-          counter6KHz <= counter6KHz + 'd1;
+          counter12KHz <= counter12KHz + 'd1;
+          counter48KHz <= counter48KHz + 'd1;
         end
       end
 
       assign clk_3MHz = (counter3MHz > 'd15);
       assign clk_3KHz = (counter3KHz > 'd16383);
-      assign clk_6KHz = (counter6KHz > 'd8192);
       assign clk_3MHz_en = counter3MHz == 'd15;
       assign clk_6MHz_en = counter3MHz[3:0] == 5'd15;
       assign clk_3KHz_en = counter3KHz == 'd16383;
-      assign clk_6KHz_en = counter6KHz == 'd8192;
+      assign clk_12KHz_en = counter12KHz == 'd4095;
+      assign clk_48KHz_en = counter48KHz == 'd1023;
 
     end // else: !if(CLK_DIV == "TRUE")
   endgenerate
@@ -223,7 +222,7 @@ assign clk=clk_i;
 	  .mod_redbaron   (mod_redbaron)
      );
 
-wire prog_rom_cs = dl_addr < 'h4000;
+  wire prog_rom_cs = dl_addr < 'h4000;
 
   dpram #(.addr_width_g(14),.data_width_g(8)) progRom (
 	.clock_a(clk),
@@ -236,25 +235,7 @@ wire prog_rom_cs = dl_addr < 'h4000;
 	.address_b(prog_rom_addr[13:0]),
 	.q_b(dataFromBram[`BRAM_PROG_ROM])
 	);
-/*	
-  prog_rom progRom
-    (
-     .addr        (prog_rom_addr[13:0]),
-     .clk         (clk),
-     .clk_en      (clk_3MHz_en),
-     .dout        (dataFromBram[`BRAM_PROG_ROM])
-     );
-	*/
-	
-  /*
-  prog progRom
-  (
-	  .addr        (prog_rom_addr[13:0]),
-     .clk         (clk),
-     //.clk_en      (clk_3MHz_en),
-     .data        (dataFromBram[`BRAM_PROG_ROM])
-	);
-*/
+
   sp_ram
     #
     (
@@ -287,18 +268,7 @@ wire prog_rom_cs = dl_addr < 'h4000;
 	.data_b(dataToBram[`BRAM_VECTOR]),
 	.q_b(dataFromBram[`BRAM_VECTOR])
 	);
-/*	  
-  (* ram_style = "block" *) logic [7:0] vecram2_store[8192];
-  initial begin
-    $readmemh("avg_clean2.mem", vecram2_store, 0, 8191);
-  end
-  always @(posedge clk) begin
-    if (clk_3MHz_en) begin
-      if (weEnBram[`BRAM_VECTOR]) vecram2_store[addrToBram[`BRAM_VECTOR][12:0]] <= dataToBram[`BRAM_VECTOR];
-      dataFromBram[`BRAM_VECTOR] <= vecram2_store[addrToBram[`BRAM_VECTOR][12:0]];
-    end
-  end
-*/
+
   logic [15:0] vec_ram_write_addr;
   logic [15:0] vec_ram_read_addr;
 
@@ -314,9 +284,7 @@ wire prog_rom_cs = dl_addr < 'h4000;
   
   (* ram_style = "block" *) logic [7:0] vecram_store[8192];
   logic [15:0] inst_pipe; // Original implementation had a pipe stage
-  //initial begin
-  //  $readmemh("avg_clean2.mem", vecram_store, 0, 8191);
-  //end
+  
   always @(posedge clk) begin
     if (vecram_we) begin
       vecram_store[vecram_addr] <= vecram_data;
@@ -447,7 +415,7 @@ wire prog_rom_cs = dl_addr < 'h4000;
      .clk            (clk),
      .clk_en         (clk_3MHz_en),
      .rst            (rst),
-	  .mod_redbaron   (mod_redbaron),
+	   .mod_redbaron   (mod_redbaron),
      .dataOut        (dataFromBram[`BRAM_MATH])
      );
 
@@ -465,126 +433,25 @@ wire prog_rom_cs = dl_addr < 'h4000;
     end
   end
 
-  logic[7:0] outputLatch;
-
-  //sound
-  logic      pokeyEn;
-  logic      pokeyEnRB;
-  logic      pokeyEnBZ;
-  
-  // Red Baron has the pokey in a different position
-  assign pokeyEnBZ = ~(addrToBram[`BRAM_POKEY] >= 16'h1820 && addrToBram[`BRAM_POKEY] < 16'h1830);
-  assign pokeyEnRB = ~(addrToBram[`BRAM_POKEY] >= 16'h1810 && addrToBram[`BRAM_POKEY] < 16'h1820);
-  assign pokeyEn = mod_redbaron ? pokeyEnRB : pokeyEnBZ;
-
-  //output latch for POKEY
-  always_ff @(posedge clk) begin
-    if (clk_3MHz_en) begin
-      if(rst) begin
-        outputLatch <= 'd0;
-      end
-      if(addrToBram[`BRAM_POKEY] == 16'h1840 && weEnBram[`BRAM_POKEY]) begin
-        outputLatch <= dataToBram[`BRAM_POKEY];
-      end
-      else begin
-        outputLatch <= outputLatch;
-      end
-    end // if (clk_3MHz_en)
-  end  
-
-  logic[7:0] outputLatch_redbaron;
-
-  //output latch for POKEY
-  always_ff @(posedge clk) begin
-    if (clk_3MHz_en) begin
-      if(rst) begin
-        outputLatch_redbaron <= 'd0;
-      end
-      if(addrToBram[`BRAM_POKEY] == 16'h1808 && weEnBram[`BRAM_POKEY]) begin
-        outputLatch_redbaron <= dataToBram[`BRAM_POKEY];
-      end
-      else begin
-        outputLatch_redbaron <= outputLatch_redbaron;
-      end
-    end // if (clk_3MHz_en)
-  end
-  
-  
-  assign ampSD = outputLatch[5];
-
-  POKEY pokey
+  sound sound
     (
-     .Din              (dataToBram[`BRAM_POKEY] ),
-     .Dout             (dataFromBram[`BRAM_POKEY]),
-     .A                (addrToBram[`BRAM_POKEY][3:0]),
-     .P                (buttons),
-     .phi2             (clk_3MHz),
-     .readHighWriteLow (~weEnBram[`BRAM_POKEY]),
-     .cs0Bar           (pokeyEn),
-     .aud              (ampPWM),
-	  .audio (audio),
-     .clk              (clk)
+     .rst(rst),
+     .clk(clk),
+     .clk_3MHz(clk_3MHz),
+     .clk_3MHz_en(clk_3MHz_en),
+     .clk_12KHz_en(clk_12KHz_en),
+     .clk_48KHz_en(clk_48KHz_en),
+     .dl_addr(dl_addr),
+     .dl_data(dl_data),
+     .mod_redbaron(mod_redbaron),
+     .should_read(weEnBram[`BRAM_POKEY]), 
+     .buttons(buttons),
+     .addr_to_bram(addrToBram[`BRAM_POKEY]), 
+     .data_to_bram(dataToBram[`BRAM_POKEY]),
+     .audiosel(audiosel),
+     .data_from_bram(dataFromBram[`BRAM_POKEY]),
+     .audio(audio)
      );
-
-  logic [15:0] extAud;
-  logic        feedbackAlpha;
-  logic        lfsrOut0, lfsrOut1;
-
-  logic        otherAud0, otherAud1;
-
-  xnor xnor0(feedbackAlpha, extAud[3], extAud[14]);
-
-  assign lfsrOut0 = extAud[15];
-  assign lfsrOut1 = !(&extAud[14:11]);
-
-  assign audiosel = mod_redbaron ? outputLatch_redbaron : outputLatch;
- /* 
-  always_ff @(posedge clk)
-  begin
-    if (clk_3MHz)
-	   audiosel<=dataFromBram[`BRAM_POKEY];
-  end
-  */
-  always_ff @(posedge clk)
-    if (clk_6KHz_en) begin
-      if (rst | !ampSD) begin
-        extAud <= '0;
-      end else if(ampSD) begin
-        extAud <= (extAud << 1) | feedbackAlpha;
-      end
-    end
-
-  always_ff @(posedge clk)
-    if (clk_6KHz_en) begin
-      if (rst) begin
-        otherAud0 <= '0;
-        otherAud1 <= '0;
-      end else begin
-        if (lfsrOut0) otherAud0 <= ~otherAud0;
-        if (lfsrOut1) otherAud1 <= ~otherAud1;
-      end
-    end
-
-  assign JD[0] = ~outputLatch[3];
-  assign JD[1] = ~outputLatch[2];
-  assign JD[2] = ~otherAud0;
-  assign JD[3] = ~outputLatch[1];
-  assign JD[4] = ~outputLatch[0];
-  assign JD[5] = ~otherAud1;
-
-  always_comb begin
-    //motoren
-    if(outputLatch[5]) begin
-      JD[6] = ~outputLatch[7];
-      JD[7] = ~outputLatch[4];
-    end
-    else begin
-      JD[6] = 1'b1;
-      JD[7] = 1'b1;
-
-    end
-  end
-
 
 endmodule
 `default_nettype wire

@@ -38,3 +38,12 @@ c5_pin_model_dump.txt
 *.cdf
 *.qarlog
 qar_info.json
+*.vvp
+*.*#
+venv
+spice/*.wav
+rtl/*.wav
+spice/output.*
+./spice/history
+.idea
+spice/.ipynb_checkpoints/
